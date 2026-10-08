@@ -17,13 +17,8 @@ import {
   CheckCircle2, 
   Fingerprint, 
   Info, 
-  HelpCircle, 
   X, 
-  RotateCcw,
-  Copy,
-  ChevronDown,
-  ChevronUp,
-  Sparkles
+  RotateCcw
 } from 'lucide-react';
 import { safeFetchJson } from '../utils/api';
 
@@ -36,10 +31,6 @@ export const AdminLogin: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // Help & Info Accordion State
-  const [showHelpGuide, setShowHelpGuide] = useState(false);
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // Recovery Modal State
   const [isRecoveryOpen, setIsRecoveryOpen] = useState(false);
@@ -341,8 +332,8 @@ export const AdminLogin: React.FC = () => {
       }
 
       setRecoverySuccess('Master password successfully reset! Any lockout was cleared.');
-      setPassword(newPassword);
-      setSuccess('Master password successfully updated. You may now log in.');
+      setPassword('');
+      setSuccess('Master password successfully updated. Please log in with your new password.');
       setError(null);
 
       setTimeout(() => {
@@ -361,7 +352,11 @@ export const AdminLogin: React.FC = () => {
   };
 
   const handleQuickRestoreDefault = async () => {
-    const keyToUse = recoveryKey.trim() || DEFAULT_RECOVERY_KEY;
+    const keyToUse = recoveryKey.trim();
+    if (!keyToUse) {
+      setRecoveryError('Please enter the Root Emergency Recovery Key.');
+      return;
+    }
     setRecovering(true);
     setRecoveryError(null);
     setRecoverySuccess(null);
@@ -381,21 +376,22 @@ export const AdminLogin: React.FC = () => {
       }
 
       if (keyToUse !== DEFAULT_RECOVERY_KEY) {
-        throw new Error('Invalid recovery key for restore.');
+        throw new Error('Invalid emergency recovery key.');
       }
 
       localStorage.removeItem('cse_admin_custom_password');
       localStorage.removeItem('cse_admin_failed_attempts');
       localStorage.removeItem('cse_admin_lockout_until');
 
-      setPassword(DEFAULT_MASTER_KEY);
-      setRecoverySuccess(`Credentials restored! Master Key is: ${DEFAULT_MASTER_KEY}`);
-      setSuccess(`Password restored to default: ${DEFAULT_MASTER_KEY}`);
+      setPassword('');
+      setRecoverySuccess('System credentials successfully restored to factory defaults.');
+      setSuccess('Master password restored to default settings. You may now log in.');
       setError(null);
 
       setTimeout(() => {
         setIsRecoveryOpen(false);
         setRecoverySuccess(null);
+        setRecoveryKey('');
         fetchSecurityInfo();
       }, 1200);
     } catch (err: any) {
@@ -408,22 +404,10 @@ export const AdminLogin: React.FC = () => {
   const handleDirectUnlock = () => {
     localStorage.removeItem('cse_admin_failed_attempts');
     localStorage.removeItem('cse_admin_lockout_until');
-    setPassword(localStorage.getItem('cse_admin_custom_password') || DEFAULT_MASTER_KEY);
+    setPassword('');
     setError(null);
-    setSuccess('Lockout cleared! You can now log in.');
+    setSuccess('Security lockout cleared. Please enter your administrator passphrase to log in.');
     fetchSecurityInfo();
-  };
-
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard?.writeText(text);
-    setCopiedKey(label);
-    setTimeout(() => setCopiedKey(null), 2500);
-  };
-
-  const fillDefaultPassword = () => {
-    const active = localStorage.getItem('cse_admin_custom_password') || DEFAULT_MASTER_KEY;
-    setPassword(active);
-    setError(null);
   };
 
   return (
@@ -493,7 +477,9 @@ export const AdminLogin: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setRecoveryKey(DEFAULT_RECOVERY_KEY);
+                      setRecoveryKey('');
+                      setRecoveryError(null);
+                      setRecoverySuccess(null);
                       setIsRecoveryOpen(true);
                     }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-900/90 hover:bg-rose-800 text-white font-medium text-xs transition-colors cursor-pointer"
@@ -521,15 +507,6 @@ export const AdminLogin: React.FC = () => {
               <div className="flex-1">
                 <span className="font-semibold block mb-0.5">Authentication Failed</span>
                 <span className="text-rose-200/90">{error}</span>
-                <div className="mt-2 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => fillDefaultPassword()}
-                    className="text-[11px] font-mono text-rose-300 hover:text-white underline cursor-pointer"
-                  >
-                    Try default password: {DEFAULT_MASTER_KEY}
-                  </button>
-                </div>
               </div>
             </div>
           )}
@@ -564,7 +541,12 @@ export const AdminLogin: React.FC = () => {
                 </label>
                 <button
                   type="button"
-                  onClick={() => setIsRecoveryOpen(true)}
+                  onClick={() => {
+                    setRecoveryKey('');
+                    setRecoveryError(null);
+                    setRecoverySuccess(null);
+                    setIsRecoveryOpen(true);
+                  }}
                   className="text-[11px] text-slate-400 hover:text-rose-400 transition-colors underline cursor-pointer"
                 >
                   Forgot password?
@@ -594,24 +576,23 @@ export const AdminLogin: React.FC = () => {
                 </button>
               </div>
 
-              {/* Quick Fill Default Button */}
-              <div className="mt-2 flex items-center justify-between text-[11px]">
+              {/* Portal Security Indicator & Emergency Recovery Link */}
+              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 font-mono">
+                <span className="flex items-center gap-1">
+                  <Lock className="w-3 h-3 text-slate-500" />
+                  <span>Authorized Staff Only</span>
+                </span>
                 <button
                   type="button"
-                  onClick={fillDefaultPassword}
-                  className="inline-flex items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
+                  onClick={() => {
+                    setRecoveryKey('');
+                    setRecoveryError(null);
+                    setRecoverySuccess(null);
+                    setIsRecoveryOpen(true);
+                  }}
+                  className="text-slate-400 hover:text-rose-400 transition-colors underline cursor-pointer"
                 >
-                  <Sparkles className="w-3 h-3 text-emerald-400" />
-                  <span>Insert default Master Key</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowHelpGuide(!showHelpGuide)}
-                  className="text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1 cursor-pointer"
-                >
-                  <HelpCircle className="w-3 h-3" />
-                  <span>Key Info</span>
-                  {showHelpGuide ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  Emergency Recovery
                 </button>
               </div>
             </div>
@@ -631,65 +612,6 @@ export const AdminLogin: React.FC = () => {
               )}
             </button>
           </form>
-
-          {/* Master Key Help & Credentials Explainer */}
-          {showHelpGuide && (
-            <div className="mt-4 p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs text-slate-300 space-y-2.5">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                <span className="font-semibold text-white flex items-center gap-1.5">
-                  <KeyRound className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Master Key & Access Credentials</span>
-                </span>
-                <span className="text-[10px] font-mono text-emerald-400">Live Config</span>
-              </div>
-
-              <div>
-                <span className="text-slate-400 text-[11px] block mb-1">
-                  1. Default Master Key (Password):
-                </span>
-                <div className="flex items-center justify-between bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-800">
-                  <code className="text-rose-300 font-mono text-[11px]">{DEFAULT_MASTER_KEY}</code>
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(DEFAULT_MASTER_KEY, 'master')}
-                    className="text-slate-400 hover:text-white p-1"
-                    title="Copy Master Key"
-                  >
-                    {copiedKey === 'master' ? (
-                      <span className="text-[10px] text-emerald-400">Copied!</span>
-                    ) : (
-                      <Copy className="w-3 h-3" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <span className="text-slate-400 text-[11px] block mb-1">
-                  2. Root Emergency Recovery Key:
-                </span>
-                <div className="flex items-center justify-between bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-800">
-                  <code className="text-amber-300 font-mono text-[11px]">{DEFAULT_RECOVERY_KEY}</code>
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(DEFAULT_RECOVERY_KEY, 'recovery')}
-                    className="text-slate-400 hover:text-white p-1"
-                    title="Copy Recovery Key"
-                  >
-                    {copiedKey === 'recovery' ? (
-                      <span className="text-[10px] text-emerald-400">Copied!</span>
-                    ) : (
-                      <Copy className="w-3 h-3" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="text-[11px] text-slate-400 pt-1 leading-relaxed">
-                If you forgot your changed password, open the <button type="button" onClick={() => setIsRecoveryOpen(true)} className="text-rose-400 underline cursor-pointer">Emergency Reset</button> dialog and use the Root Recovery Key to reset or restore access.
-              </div>
-            </div>
-          )}
 
           {/* Security Information Footnote */}
           <div className="mt-5 pt-4 border-t border-slate-800 text-[11px] text-slate-400 space-y-2">
@@ -744,29 +666,17 @@ export const AdminLogin: React.FC = () => {
 
             <form onSubmit={handleEmergencyReset} className="space-y-3">
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-slate-300">
-                    Emergency Master Recovery Key *
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setRecoveryKey(DEFAULT_RECOVERY_KEY)}
-                    className="text-[10px] text-amber-400 hover:text-amber-300 underline cursor-pointer"
-                  >
-                    Insert default key
-                  </button>
-                </div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Emergency Master Recovery Key *
+                </label>
                 <input
                   type="text"
                   value={recoveryKey}
                   onChange={(e) => setRecoveryKey(e.target.value)}
-                  placeholder="e.g. CSE2026-RECOVER-ROOT-ACCESS"
+                  placeholder="Enter system root recovery key"
                   required
                   className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white font-mono focus:outline-none focus:ring-2 focus:ring-rose-500"
                 />
-                <span className="text-[10px] text-slate-500 mt-1 block">
-                  Root Key: <code className="text-slate-400 font-mono">{DEFAULT_RECOVERY_KEY}</code>
-                </span>
               </div>
 
               <div>
@@ -805,7 +715,7 @@ export const AdminLogin: React.FC = () => {
                   disabled={recovering}
                   className="w-full sm:w-auto px-3 py-2 rounded-lg text-xs font-medium text-amber-300 bg-amber-950/60 hover:bg-amber-900/80 border border-amber-800 transition-colors disabled:opacity-50 cursor-pointer text-center"
                 >
-                  Restore Default Key ({DEFAULT_MASTER_KEY})
+                  Restore Factory Default
                 </button>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
