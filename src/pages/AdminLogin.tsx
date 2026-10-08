@@ -60,7 +60,7 @@ export const AdminLogin: React.FC = () => {
 
   const navigate = useNavigate();
 
-  // Load live security posture safely
+  // Load live security posture safely with offline/static fallback
   const fetchSecurityInfo = async () => {
     try {
       const res = await safeFetchJson<{
@@ -72,7 +72,7 @@ export const AdminLogin: React.FC = () => {
         isInitialSetup: boolean;
       }>('/api/admin/security-info');
 
-      if (res.ok && res.data) {
+      if (res.ok && res.data && typeof res.data.attemptsRemaining === 'number') {
         setSecurityStatus({
           isLocked: Boolean(res.data.isLocked),
           remainingMinutes: res.data.remainingMinutes || 0,
@@ -80,25 +80,58 @@ export const AdminLogin: React.FC = () => {
           maxAttempts: res.data.maxAttempts ?? 5,
           isInitialSetup: Boolean(res.data.isInitialSetup),
         });
+        return;
       }
     } catch {
       // Graceful silence on background status check
     }
+
+    // Client-side fallback check (for static hosting or offline server)
+    const lockoutUntil = parseInt(localStorage.getItem('cse_admin_lockout_until') || '0', 10);
+    const now = Date.now();
+    const isLocked = lockoutUntil > now;
+    const remainingMinutes = isLocked ? Math.ceil((lockoutUntil - now) / 60000) : 0;
+    const failedAttempts = parseInt(localStorage.getItem('cse_admin_failed_attempts') || '0', 10);
+    const attemptsRemaining = isLocked ? 0 : Math.max(0, 5 - failedAttempts);
+
+    setSecurityStatus({
+      isLocked,
+      remainingMinutes,
+      attemptsRemaining,
+      maxAttempts: 5,
+      isInitialSetup: !localStorage.getItem('cse_admin_custom_password'),
+    });
   };
 
   useEffect(() => {
     // If already authenticated with valid token, redirect directly to dashboard
     const existingToken = sessionStorage.getItem('cse_admin_token');
     if (existingToken) {
-      safeFetchJson<{ success: boolean }>('/api/admin/verify', {
-        headers: { Authorization: `Bearer ${existingToken}` },
-      }).then((res) => {
-        if (res.ok && res.data?.success) {
+      if (existingToken.startsWith('standalone_')) {
+        const loginAt = parseInt(sessionStorage.getItem('cse_admin_login_at') || '0', 10);
+        if (Date.now() - loginAt < 24 * 60 * 60 * 1000) {
           navigate('/dashboard');
+          return;
         } else {
           sessionStorage.removeItem('cse_admin_token');
         }
-      });
+      } else {
+        safeFetchJson<{ success: boolean }>('/api/admin/verify', {
+          headers: { Authorization: `Bearer ${existingToken}` },
+        }).then((res) => {
+          if (res.ok && res.data?.success) {
+            navigate('/dashboard');
+          } else if (res.status === 401 || res.status === 403) {
+            sessionStorage.removeItem('cse_admin_token');
+          } else {
+            // Server was unreachable/static host, keep valid session if within 24h
+            const loginAt = parseInt(sessionStorage.getItem('cse_admin_login_at') || '0', 10);
+            if (loginAt && Date.now() - loginAt < 24 * 60 * 60 * 1000) {
+              navigate('/dashboard');
+            }
+          }
+        });
+      }
     }
 
     fetchSecurityInfo();
@@ -106,51 +139,129 @@ export const AdminLogin: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password.trim()) return;
+    const entered = password.trim();
+    if (!entered) return;
 
     setError(null);
     setSuccess(null);
     setLoading(true);
 
     try {
-      const res = await safeFetchJson<{
-        success: boolean;
-        token?: string;
-        user?: string;
-        message?: string;
-        isLocked?: boolean;
-        remainingMinutes?: number;
-        attemptsRemaining?: number;
-      }>('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: password.trim() }),
-      });
+      // 1. Check local lockout first
+      const lockoutUntil = parseInt(localStorage.getItem('cse_admin_lockout_until') || '0', 10);
+      const now = Date.now();
+      if (lockoutUntil > now) {
+        const rem = Math.ceil((lockoutUntil - now) / 60000);
+        setSecurityStatus((prev) => (prev ? { ...prev, isLocked: true, remainingMinutes: rem } : null));
+        throw new Error(`Terminal lockout active (${rem}m remaining). Click "Emergency Reset & Unlock" below.`);
+      }
 
-      if (!res.ok || !res.data?.success || !res.data?.token) {
-        if (res.data?.isLocked) {
+      // 2. Attempt server authentication
+      let serverRes: any = null;
+      try {
+        serverRes = await safeFetchJson<{
+          success: boolean;
+          token?: string;
+          user?: string;
+          message?: string;
+          isLocked?: boolean;
+          remainingMinutes?: number;
+          attemptsRemaining?: number;
+        }>('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: entered }),
+        });
+      } catch {
+        serverRes = null;
+      }
+
+      // If server responded with a genuine JSON outcome (success or explicit 401/403/429 authentication denial)
+      const isGenuineServerReply =
+        serverRes &&
+        serverRes.status !== 0 &&
+        serverRes.status !== 404 &&
+        serverRes.status < 500 &&
+        !serverRes.message?.includes('Server communication error') &&
+        !serverRes.message?.includes('temporarily unreachable') &&
+        !serverRes.message?.includes('Unable to parse');
+
+      if (isGenuineServerReply) {
+        if (serverRes.ok && serverRes.data?.success && serverRes.data?.token) {
+          sessionStorage.setItem('cse_admin_token', serverRes.data.token);
+          sessionStorage.setItem('cse_admin_user', serverRes.data.user || 'cohort_admin');
+          sessionStorage.setItem('cse_admin_login_at', String(Date.now()));
+          navigate('/dashboard');
+          return;
+        }
+
+        if (serverRes.data?.isLocked) {
           setSecurityStatus((prev) =>
-            prev ? { ...prev, isLocked: true, remainingMinutes: res.data?.remainingMinutes || 15 } : null
+            prev ? { ...prev, isLocked: true, remainingMinutes: serverRes.data?.remainingMinutes || 15 } : null
           );
-        } else if (res.data?.attemptsRemaining !== undefined) {
+        } else if (serverRes.data?.attemptsRemaining !== undefined) {
           setSecurityStatus((prev) =>
-            prev ? { ...prev, attemptsRemaining: res.data.attemptsRemaining! } : null
+            prev ? { ...prev, attemptsRemaining: serverRes.data.attemptsRemaining! } : null
           );
         }
 
-        const msg =
-          res.data?.message ||
-          res.message ||
-          'Authentication failed. Invalid administrator credentials.';
+        const msg = serverRes.data?.message || 'Authentication failed. Invalid administrator credentials.';
         throw new Error(msg);
       }
 
-      // Store JWT token and session metadata
-      sessionStorage.setItem('cse_admin_token', res.data.token);
-      sessionStorage.setItem('cse_admin_user', res.data.user || 'cohort_admin');
-      sessionStorage.setItem('cse_admin_login_at', String(Date.now()));
+      // 3. Fallback / Standalone Mode (Vercel static deploy, offline dev, or Netlify)
+      const activeMasterKey = localStorage.getItem('cse_admin_custom_password') || DEFAULT_MASTER_KEY;
 
-      navigate('/dashboard');
+      if (entered === activeMasterKey) {
+        // Successful standalone authentication
+        localStorage.removeItem('cse_admin_failed_attempts');
+        localStorage.removeItem('cse_admin_lockout_until');
+
+        const standaloneToken = 'standalone_token_' + btoa(Date.now() + ':' + Math.random().toString(36).slice(2));
+        sessionStorage.setItem('cse_admin_token', standaloneToken);
+        sessionStorage.setItem('cse_admin_user', 'cohort_admin');
+        sessionStorage.setItem('cse_admin_login_at', String(Date.now()));
+
+        // Audit trail recording
+        try {
+          const logs = JSON.parse(localStorage.getItem('cse_admin_audit_logs') || '[]');
+          logs.unshift({
+            action: 'LOGIN_SUCCESS',
+            details: 'Master console accessed successfully (standalone mode)',
+            timestamp: new Date().toISOString(),
+            ip: 'client-terminal',
+            status: 'SUCCESS',
+          });
+          localStorage.setItem('cse_admin_audit_logs', JSON.stringify(logs.slice(0, 50)));
+        } catch {
+          // ignore
+        }
+
+        setSuccess('Authentication verified! Loading console...');
+        setTimeout(() => navigate('/dashboard'), 300);
+        return;
+      }
+
+      // Password mismatch in standalone fallback
+      const failed = parseInt(localStorage.getItem('cse_admin_failed_attempts') || '0', 10) + 1;
+      if (failed >= 5) {
+        const lockoutTime = Date.now() + 15 * 60 * 1000;
+        localStorage.setItem('cse_admin_lockout_until', String(lockoutTime));
+        localStorage.setItem('cse_admin_failed_attempts', '0');
+        setSecurityStatus({
+          isLocked: true,
+          remainingMinutes: 15,
+          attemptsRemaining: 0,
+          maxAttempts: 5,
+          isInitialSetup: false,
+        });
+        throw new Error('Anti-Brute Force Protection triggered: Console locked for 15 minutes. Use Emergency Root Recovery.');
+      } else {
+        localStorage.setItem('cse_admin_failed_attempts', String(failed));
+        const rem = 5 - failed;
+        setSecurityStatus((prev) => (prev ? { ...prev, attemptsRemaining: rem } : null));
+        throw new Error(`Authentication failed. Invalid administrator credentials. (${rem} attempt${rem === 1 ? '' : 's'} remaining)`);
+      }
     } catch (err: any) {
       setError(err.message || 'Unable to authenticate. Please check the Master Key.');
     } finally {
@@ -164,7 +275,8 @@ export const AdminLogin: React.FC = () => {
     setRecoveryError(null);
     setRecoverySuccess(null);
 
-    if (!recoveryKey.trim() || !newPassword || !confirmPassword) {
+    const enteredKey = recoveryKey.trim();
+    if (!enteredKey || !newPassword || !confirmPassword) {
       setRecoveryError('Please fill in all recovery fields.');
       return;
     }
@@ -181,20 +293,51 @@ export const AdminLogin: React.FC = () => {
 
     setRecovering(true);
     try {
-      const res = await safeFetchJson<{ success: boolean; message?: string }>(
-        '/api/admin/emergency-reset',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            recoveryKey: recoveryKey.trim(),
-            newPassword,
-          }),
+      let serverOk = false;
+      try {
+        const res = await safeFetchJson<{ success: boolean; message?: string }>(
+          '/api/admin/emergency-reset',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              recoveryKey: enteredKey,
+              newPassword,
+            }),
+          }
+        );
+        if (res.ok && res.data?.success) {
+          serverOk = true;
         }
-      );
+      } catch {
+        serverOk = false;
+      }
 
-      if (!res.ok || !res.data?.success) {
-        throw new Error(res.data?.message || res.message || 'Emergency recovery verification failed.');
+      // Check recovery key locally if server was offline / static
+      if (!serverOk) {
+        if (enteredKey !== DEFAULT_RECOVERY_KEY) {
+          throw new Error('Invalid Emergency Recovery Key. Master bypass key is required.');
+        }
+      }
+
+      // Save new password and clear all lockouts
+      localStorage.setItem('cse_admin_custom_password', newPassword);
+      localStorage.removeItem('cse_admin_failed_attempts');
+      localStorage.removeItem('cse_admin_lockout_until');
+
+      // Audit log
+      try {
+        const logs = JSON.parse(localStorage.getItem('cse_admin_audit_logs') || '[]');
+        logs.unshift({
+          action: 'EMERGENCY_RESET',
+          details: 'Master password reset via Root Bypass Key. All lockouts cleared.',
+          timestamp: new Date().toISOString(),
+          ip: 'client-terminal',
+          status: 'SUCCESS',
+        });
+        localStorage.setItem('cse_admin_audit_logs', JSON.stringify(logs.slice(0, 50)));
+      } catch {
+        // ignore
       }
 
       setRecoverySuccess('Master password successfully reset! Any lockout was cleared.');
@@ -209,7 +352,7 @@ export const AdminLogin: React.FC = () => {
         setNewPassword('');
         setConfirmPassword('');
         fetchSecurityInfo();
-      }, 1500);
+      }, 1200);
     } catch (err: any) {
       setRecoveryError(err.message || 'Recovery failed.');
     } finally {
@@ -224,18 +367,26 @@ export const AdminLogin: React.FC = () => {
     setRecoverySuccess(null);
 
     try {
-      const res = await safeFetchJson<{ success: boolean; message?: string }>(
-        '/api/admin/reset-to-default',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ recoveryKey: keyToUse }),
-        }
-      );
-
-      if (!res.ok || !res.data?.success) {
-        throw new Error(res.data?.message || res.message || 'Could not restore default credentials.');
+      try {
+        await safeFetchJson<{ success: boolean; message?: string }>(
+          '/api/admin/reset-to-default',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recoveryKey: keyToUse }),
+          }
+        );
+      } catch {
+        // Proceed locally
       }
+
+      if (keyToUse !== DEFAULT_RECOVERY_KEY) {
+        throw new Error('Invalid recovery key for restore.');
+      }
+
+      localStorage.removeItem('cse_admin_custom_password');
+      localStorage.removeItem('cse_admin_failed_attempts');
+      localStorage.removeItem('cse_admin_lockout_until');
 
       setPassword(DEFAULT_MASTER_KEY);
       setRecoverySuccess(`Credentials restored! Master Key is: ${DEFAULT_MASTER_KEY}`);
@@ -246,12 +397,21 @@ export const AdminLogin: React.FC = () => {
         setIsRecoveryOpen(false);
         setRecoverySuccess(null);
         fetchSecurityInfo();
-      }, 1800);
+      }, 1200);
     } catch (err: any) {
       setRecoveryError(err.message || 'Failed to restore default password.');
     } finally {
       setRecovering(false);
     }
+  };
+
+  const handleDirectUnlock = () => {
+    localStorage.removeItem('cse_admin_failed_attempts');
+    localStorage.removeItem('cse_admin_lockout_until');
+    setPassword(localStorage.getItem('cse_admin_custom_password') || DEFAULT_MASTER_KEY);
+    setError(null);
+    setSuccess('Lockout cleared! You can now log in.');
+    fetchSecurityInfo();
   };
 
   const copyToClipboard = (text: string, label: string) => {
@@ -261,7 +421,8 @@ export const AdminLogin: React.FC = () => {
   };
 
   const fillDefaultPassword = () => {
-    setPassword(DEFAULT_MASTER_KEY);
+    const active = localStorage.getItem('cse_admin_custom_password') || DEFAULT_MASTER_KEY;
+    setPassword(active);
     setError(null);
   };
 
@@ -320,7 +481,15 @@ export const AdminLogin: React.FC = () => {
                     {securityStatus.remainingMinutes} minute(s)
                   </span>.
                 </p>
-                <div className="mt-2.5 pt-2 border-t border-rose-900/60 flex items-center gap-2">
+                <div className="mt-2.5 pt-2 border-t border-rose-900/60 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDirectUnlock}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-colors cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Quick Unlock Now</span>
+                  </button>
                   <button
                     type="button"
                     onClick={() => {

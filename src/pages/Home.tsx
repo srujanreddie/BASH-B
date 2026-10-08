@@ -36,13 +36,24 @@ import { safeFetchJson } from '../utils/api';
 import { SEED_COURSES, DEFAULT_NOTICES } from '../data/seedCourses';
 
 export const Home: React.FC = () => {
-  const [courses, setCourses] = useState<Course[]>(() => SEED_COURSES);
+  const [courses, setCourses] = useState<Course[]>(() => {
+    try {
+      const stored = localStorage.getItem('cse_sem1_cached_courses');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // fallback
+    }
+    return SEED_COURSES;
+  });
   const [notices, setNotices] = useState<Notice[]>(() => {
     try {
       const cached = localStorage.getItem('cse_sem1_cached_notices');
-      if (cached) {
+      if (cached !== null) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch {
       // fallback
