@@ -240,6 +240,17 @@ function safeCompare(a: string, b: string): boolean {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
+// Normalized IP extraction supporting reverse proxies and Cloud Run
+function getClientIp(req: Request): string {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    const first = forwarded.split(',')[0].trim();
+    return first.replace(/^::ffff:/, '') || '127.0.0.1';
+  }
+  const remote = req.socket.remoteAddress || '127.0.0.1';
+  return remote.replace(/^::ffff:/, '') || '127.0.0.1';
+}
+
 // -----------------------------------------------------------------------------
 // Authentication Middleware (Protected Routes)
 // -----------------------------------------------------------------------------
@@ -279,7 +290,7 @@ function authMiddleware(req: Request, res: Response, next: NextFunction) {
 
 // GET /api/admin/security-info: Public security posture check (No credentials leaked)
 app.get('/api/admin/security-info', (req: Request, res: Response) => {
-  const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+  const clientIp = getClientIp(req);
   const record = loginAttempts.get(clientIp);
   const now = Date.now();
   const isLocked = Boolean(record && record.lockedUntil > now);
@@ -300,7 +311,7 @@ app.get('/api/admin/security-info', (req: Request, res: Response) => {
 // POST /api/admin/login: Authenticate administrator with anti-brute force delay & lockout
 app.post('/api/admin/login', async (req: Request, res: Response) => {
   const { password } = req.body;
-  const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+  const clientIp = getClientIp(req);
   const userAgent = req.headers['user-agent'] as string;
   const now = Date.now();
   const record = loginAttempts.get(clientIp);
@@ -409,7 +420,7 @@ app.post('/api/admin/logout', authMiddleware, (req: Request, res: Response) => {
   if (token) {
     revokedTokens.add(token);
   }
-  const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+  const clientIp = getClientIp(req);
   recordSecurityAudit('LOGOUT', clientIp, 'Admin ended session and revoked active token.', 'info');
   return res.json({ success: true, message: 'Logged out successfully. Token revoked.' });
 });
@@ -417,7 +428,7 @@ app.post('/api/admin/logout', authMiddleware, (req: Request, res: Response) => {
 // POST /api/admin/change-password: Change master password (Protected)
 app.post('/api/admin/change-password', authMiddleware, (req: Request, res: Response) => {
   const { currentPassword, newPassword } = req.body;
-  const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+  const clientIp = getClientIp(req);
 
   if (!currentPassword || !newPassword) {
     return res.status(400).json({ success: false, message: 'Current password and new password are required' });
@@ -454,7 +465,7 @@ app.post('/api/admin/change-password', authMiddleware, (req: Request, res: Respo
 // POST /api/admin/emergency-reset: Recover password using Master Recovery Key
 app.post('/api/admin/emergency-reset', async (req: Request, res: Response) => {
   const { recoveryKey, newPassword } = req.body;
-  const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+  const clientIp = getClientIp(req);
   const userAgent = req.headers['user-agent'] as string;
 
   if (!recoveryKey || !newPassword) {
@@ -489,6 +500,41 @@ app.post('/api/admin/emergency-reset', async (req: Request, res: Response) => {
     success: true,
     message: 'Master administrator password successfully reset! You can now log in with your new credentials.',
   });
+});
+
+// POST /api/admin/reset-to-default: Emergency restoration to default Admin@CSE2026#Live!
+app.post('/api/admin/reset-to-default', async (req: Request, res: Response) => {
+  try {
+    const { recoveryKey } = req.body;
+    const clientIp = getClientIp(req);
+    const userAgent = req.headers['user-agent'] as string;
+
+    if (!recoveryKey || !safeCompare(recoveryKey.trim(), MASTER_RECOVERY_KEY)) {
+      await new Promise((r) => setTimeout(r, 600));
+      recordSecurityAudit('RESTORE_DEFAULT_FAILED', clientIp, 'Invalid recovery key for default restore.', 'danger', userAgent);
+      return res.status(401).json({ success: false, message: 'Invalid Emergency Recovery Key.' });
+    }
+
+    currentAdminPassword = 'Admin@CSE2026#Live!';
+    isPasswordDefaultOrWeak = true;
+    loginAttempts.delete(clientIp);
+
+    recordSecurityAudit(
+      'RESTORE_DEFAULT_SUCCESS',
+      clientIp,
+      'Master admin credentials restored to default password.',
+      'warning',
+      userAgent
+    );
+
+    return res.json({
+      success: true,
+      message: 'Password restored to default: Admin@CSE2026#Live!',
+      defaultPassword: 'Admin@CSE2026#Live!',
+    });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: 'Reset error: ' + err.message });
+  }
 });
 
 // GET /api/admin/audit-logs: View security audit trail (Protected)
@@ -652,7 +698,7 @@ app.post('/api/notices', authMiddleware, (req: Request, res: Response) => {
 
   memoryNotices.unshift(newNotice);
 
-  const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+  const clientIp = getClientIp(req);
   recordSecurityAudit(
     'NOTICE_BROADCAST',
     clientIp,
@@ -725,7 +771,7 @@ app.delete('/api/notices/:id', authMiddleware, (req: Request, res: Response) => 
     return res.status(404).json({ success: false, message: 'Notice not found' });
   }
 
-  const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+  const clientIp = getClientIp(req);
   recordSecurityAudit(
     'NOTICE_DELETED',
     clientIp,
@@ -743,7 +789,7 @@ app.delete('/api/notices/:id', authMiddleware, (req: Request, res: Response) => 
 app.post('/api/admin/purge-notices', authMiddleware, (req: Request, res: Response) => {
   const count = memoryNotices.length;
   memoryNotices = [];
-  const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+  const clientIp = getClientIp(req);
   recordSecurityAudit(
     'ALL_NOTICES_PURGED',
     clientIp,
@@ -765,6 +811,26 @@ app.post('/api/admin/reset-lockouts', authMiddleware, (req: Request, res: Respon
   return res.json({
     success: true,
     message: `Cleared ${count} IP rate-limiting records.`,
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Explicit API 404 & Global Error Handlers (Prevents HTML response leaks)
+// -----------------------------------------------------------------------------
+
+app.all('/api/*', (req: Request, res: Response) => {
+  return res.status(404).json({
+    success: false,
+    message: `API route not found: ${req.method} ${req.originalUrl}`,
+  });
+});
+
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('Unhandled API Error:', err);
+  const status = err.status || err.statusCode || 500;
+  return res.status(status).json({
+    success: false,
+    message: err.message || 'Internal server error occurred. Please try again.',
   });
 });
 

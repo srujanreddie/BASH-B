@@ -2,5 +2,7 @@
   "name": "CSE Sem 1 Noticeboard & Vault",
   "description": "Semester 1 Computer Science and Engineering cohort noticeboard, immediate threats countdown, subject vault, and resource directory.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

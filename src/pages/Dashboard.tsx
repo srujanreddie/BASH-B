@@ -33,6 +33,7 @@ import {
   GraduationCap
 } from 'lucide-react';
 import { Course, Notice, SecurityAuditLog } from '../types';
+import { safeFetchJson } from '../utils/api';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -114,21 +115,18 @@ export const Dashboard: React.FC = () => {
     setError(null);
     try {
       const [coursesRes, noticesRes] = await Promise.all([
-        fetch('/api/courses'),
-        fetch('/api/notices'),
+        safeFetchJson<{ success: boolean; courses: Course[] }>('/api/courses'),
+        safeFetchJson<{ success: boolean; notices: Notice[] }>('/api/notices'),
       ]);
 
-      const coursesData = await coursesRes.json();
-      const noticesData = await noticesRes.json();
-
-      if (coursesData.success) {
-        setCourses(coursesData.courses);
-        if (coursesData.courses.length > 0 && !courseCode) {
-          setCourseCode(coursesData.courses[0].code);
+      if (coursesRes.ok && coursesRes.data?.courses) {
+        setCourses(coursesRes.data.courses);
+        if (coursesRes.data.courses.length > 0 && !courseCode) {
+          setCourseCode(coursesRes.data.courses[0].code);
         }
       }
-      if (noticesData.success) {
-        setNotices(noticesData.notices);
+      if (noticesRes.ok && noticesRes.data?.notices) {
+        setNotices(noticesRes.data.notices);
       }
     } catch (err: any) {
       setError('Failed to fetch data: ' + err.message);
@@ -140,12 +138,11 @@ export const Dashboard: React.FC = () => {
   const fetchAuditLogs = async () => {
     setLoadingAudit(true);
     try {
-      const res = await fetch('/api/admin/audit-logs', {
+      const res = await safeFetchJson<{ success: boolean; logs: SecurityAuditLog[] }>('/api/admin/audit-logs', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
-      if (data.success) {
-        setAuditLogs(data.logs || []);
+      if (res.ok && res.data?.logs) {
+        setAuditLogs(res.data.logs);
       }
     } catch (err: any) {
       console.error('Audit fetch error:', err);
@@ -157,7 +154,7 @@ export const Dashboard: React.FC = () => {
   const handleLogout = async () => {
     try {
       if (token) {
-        await fetch('/api/admin/logout', {
+        await safeFetchJson('/api/admin/logout', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -189,7 +186,7 @@ export const Dashboard: React.FC = () => {
 
     setChangingPassword(true);
     try {
-      const res = await fetch('/api/admin/change-password', {
+      const res = await safeFetchJson<{ success: boolean; message?: string }>('/api/admin/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -201,9 +198,8 @@ export const Dashboard: React.FC = () => {
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Failed to update password');
+      if (!res.ok || !res.data?.success) {
+        throw new Error(res.data?.message || res.message || 'Failed to update password');
       }
 
       setSecurityMsg('Master administrator passkey successfully updated! Unauthorized access is strictly blocked.');
@@ -223,18 +219,17 @@ export const Dashboard: React.FC = () => {
 
   const handlePurgeAll = async () => {
     try {
-      const res = await fetch('/api/admin/purge-notices', {
+      const res = await safeFetchJson<{ success: boolean; message?: string }>('/api/admin/purge-notices', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
-      if (data.success) {
+      if (res.ok && res.data?.success) {
         setNotices([]);
         setSuccessMsg('Live noticeboard cleaned! All demo and test notices have been purged.');
         setIsPurgeModalOpen(false);
         setTimeout(() => setSuccessMsg(null), 4000);
       } else {
-        throw new Error(data.message);
+        throw new Error(res.data?.message || res.message || 'Failed to purge notices');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to purge notices');
@@ -297,7 +292,7 @@ export const Dashboard: React.FC = () => {
       const url = editingNoticeId ? `/api/notices/${editingNoticeId}` : '/api/notices';
       const method = editingNoticeId ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
+      const res = await safeFetchJson<{ success: boolean; message?: string }>(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
@@ -306,9 +301,8 @@ export const Dashboard: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Failed to save notice');
+      if (!res.ok || !res.data?.success) {
+        throw new Error(res.data?.message || res.message || 'Failed to save notice');
       }
 
       setSuccessMsg(
@@ -334,14 +328,13 @@ export const Dashboard: React.FC = () => {
     }
 
     try {
-      const res = await fetch(`/api/notices/${id}`, {
+      const res = await safeFetchJson<{ success: boolean; message?: string }>(`/api/notices/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Failed to delete notice');
+      if (!res.ok || !res.data?.success) {
+        throw new Error(res.data?.message || res.message || 'Failed to delete notice');
       }
 
       setSuccessMsg('Notice deleted.');

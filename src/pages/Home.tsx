@@ -32,6 +32,7 @@ import CohortTimetableModal from '../components/CohortTimetableModal';
 import QuickPrintModal from '../components/QuickPrintModal';
 import { Course, Notice, CategoryFilter, UITheme, LayoutView } from '../types';
 import { exportNoticesToIcs } from '../utils/calendarExport';
+import { safeFetchJson } from '../utils/api';
 
 export const Home: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -129,18 +130,15 @@ export const Home: React.FC = () => {
 
     try {
       const [coursesRes, noticesRes] = await Promise.all([
-        fetch('/api/courses'),
-        fetch('/api/notices'),
+        safeFetchJson<{ success: boolean; courses: Course[] }>('/api/courses'),
+        safeFetchJson<{ success: boolean; notices: Notice[] }>('/api/notices'),
       ]);
 
-      const coursesData = await coursesRes.json();
-      const noticesData = await noticesRes.json();
-
-      if (coursesData.success) {
-        setCourses(coursesData.courses);
+      if (coursesRes.ok && coursesRes.data?.courses) {
+        setCourses(coursesRes.data.courses);
       }
-      if (noticesData.success) {
-        setNotices(noticesData.notices);
+      if (noticesRes.ok && noticesRes.data?.notices) {
+        setNotices(noticesRes.data.notices);
       }
     } catch (err: any) {
       setError('Failed to load notices: ' + err.message);
