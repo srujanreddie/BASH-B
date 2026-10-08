@@ -33,11 +33,23 @@ import QuickPrintModal from '../components/QuickPrintModal';
 import { Course, Notice, CategoryFilter, UITheme, LayoutView } from '../types';
 import { exportNoticesToIcs } from '../utils/calendarExport';
 import { safeFetchJson } from '../utils/api';
+import { SEED_COURSES, DEFAULT_NOTICES } from '../data/seedCourses';
 
 export const Home: React.FC = () => {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [notices, setNotices] = useState<Notice[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState<Course[]>(() => SEED_COURSES);
+  const [notices, setNotices] = useState<Notice[]>(() => {
+    try {
+      const cached = localStorage.getItem('cse_sem1_cached_notices');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // fallback
+    }
+    return DEFAULT_NOTICES;
+  });
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -134,14 +146,20 @@ export const Home: React.FC = () => {
         safeFetchJson<{ success: boolean; notices: Notice[] }>('/api/notices'),
       ]);
 
-      if (coursesRes.ok && coursesRes.data?.courses) {
+      if (coursesRes.ok && coursesRes.data?.courses && coursesRes.data.courses.length > 0) {
         setCourses(coursesRes.data.courses);
       }
       if (noticesRes.ok && noticesRes.data?.notices) {
         setNotices(noticesRes.data.notices);
+        try {
+          localStorage.setItem('cse_sem1_cached_notices', JSON.stringify(noticesRes.data.notices));
+        } catch {
+          // ignore storage quota
+        }
       }
     } catch (err: any) {
-      setError('Failed to load notices: ' + err.message);
+      // Keep offline / seed curriculum loaded without crashing the interface
+      console.warn('API sync deferred; using local offline cohort cache.', err);
     } finally {
       setLoading(false);
       setRefreshing(false);

@@ -34,12 +34,24 @@ import {
 } from 'lucide-react';
 import { Course, Notice, SecurityAuditLog } from '../types';
 import { safeFetchJson } from '../utils/api';
+import { SEED_COURSES, DEFAULT_NOTICES } from '../data/seedCourses';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [notices, setNotices] = useState<Notice[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState<Course[]>(() => SEED_COURSES);
+  const [notices, setNotices] = useState<Notice[]>(() => {
+    try {
+      const cached = localStorage.getItem('cse_sem1_cached_notices');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // fallback
+    }
+    return DEFAULT_NOTICES;
+  });
+  const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -119,17 +131,22 @@ export const Dashboard: React.FC = () => {
         safeFetchJson<{ success: boolean; notices: Notice[] }>('/api/notices'),
       ]);
 
-      if (coursesRes.ok && coursesRes.data?.courses) {
+      if (coursesRes.ok && coursesRes.data?.courses && coursesRes.data.courses.length > 0) {
         setCourses(coursesRes.data.courses);
-        if (coursesRes.data.courses.length > 0 && !courseCode) {
+        if (!courseCode) {
           setCourseCode(coursesRes.data.courses[0].code);
         }
       }
       if (noticesRes.ok && noticesRes.data?.notices) {
         setNotices(noticesRes.data.notices);
+        try {
+          localStorage.setItem('cse_sem1_cached_notices', JSON.stringify(noticesRes.data.notices));
+        } catch {
+          // ignore
+        }
       }
     } catch (err: any) {
-      setError('Failed to fetch data: ' + err.message);
+      console.warn('Backend sync deferred, continuing with cached session state:', err);
     } finally {
       setLoading(false);
     }

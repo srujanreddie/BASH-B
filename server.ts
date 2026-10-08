@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import path from 'path';
+import fs from 'fs';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 
@@ -839,7 +840,11 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 // -----------------------------------------------------------------------------
 
 async function startServer() {
-  if (process.env.NODE_ENV !== 'production') {
+  const isDev = process.env.NODE_ENV === 'development';
+  const distPath = path.resolve(__dirname, 'dist');
+  const distExists = fs.existsSync(path.resolve(distPath, 'index.html'));
+
+  if (isDev) {
     const { createServer } = await import('vite');
     const vite = await createServer({
       server: {
@@ -851,11 +856,23 @@ async function startServer() {
     });
 
     app.use(vite.middlewares);
-  } else {
-    app.use(express.static(path.resolve(__dirname, 'dist')));
+  } else if (distExists) {
+    app.use(express.static(distPath));
     app.get('*', (_req, res) => {
-      res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
+      res.sendFile(path.resolve(distPath, 'index.html'));
     });
+  } else {
+    const { createServer } = await import('vite');
+    const vite = await createServer({
+      server: {
+        middlewareMode: true,
+        host: '0.0.0.0',
+        port: PORT,
+      },
+      appType: 'spa',
+    });
+
+    app.use(vite.middlewares);
   }
 
   app.listen(PORT, '0.0.0.0', () => {
