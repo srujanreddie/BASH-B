@@ -11,8 +11,6 @@ export interface Course {
   credits: number;
   syllabusUrl?: string;
   pyqUrl?: string;
-  lectureSlidesUrl?: string;
-  labManualUrl?: string;
   description?: string;
   instructor?: string;
 }
@@ -48,3 +46,26 @@ export interface SecurityAuditLog {
   details: string;
   status: 'success' | 'warning' | 'danger' | 'info';
 }
+
+export type TimetableSlotType = 'Theory' | 'Lab' | 'Tutorial' | 'Drawing' | 'Break';
+
+export interface TimetableSlot {
+  id: string;
+  time: string; // e.g. "09:00 - 10:00"
+  code: string; // e.g. "25BS1MT101" or "BREAK" or "LUNCH"
+  subject: string;
+  room: string;
+  instructor?: string;
+  type: TimetableSlotType;
+}
+
+export type TimetableSchedule = Record<string, TimetableSlot[]>;
+
+export interface TimetableConfig {
+  cohortName: string;
+  section: string; // e.g. "Section B (BASH-B)"
+  academicYear: string;
+  lastUpdated?: string;
+  schedule: TimetableSchedule;
+}
+

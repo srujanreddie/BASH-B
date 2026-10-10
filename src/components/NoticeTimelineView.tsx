@@ -126,7 +126,7 @@ export const NoticeTimelineView: React.FC<NoticeTimelineViewProps> = ({
 
       {renderSection(
         'Study Handouts & Reference Materials',
-        'Lecture slide archives, formula banks, and PYQ solutions',
+        'Study guide archives, formula banks, and PYQ solutions',
         materials,
         'bg-emerald-600',
         <BookOpen className="w-4 h-4" />

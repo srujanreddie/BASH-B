@@ -18,124 +18,174 @@ app.use(express.json());
 var SEED_COURSES = [
   {
     code: "25BS1MT101",
-    title: "Matrices and Calculus",
-    shortTitle: "Calculus",
+    title: "Matrices and Calculus (MAC)",
+    shortTitle: "MAC",
     category: "Theory",
     credits: 4,
     syllabusUrl: "https://drive.google.com/file/d/cse-sem1-matrices-calculus-syllabus/preview",
     pyqUrl: "https://drive.google.com/drive/folders/cse-pyq-25BS1MT101",
-    lectureSlidesUrl: "https://drive.google.com/drive/folders/cse-slides-25BS1MT101",
-    labManualUrl: "https://drive.google.com/file/d/cse-25BS1MT101-formula-handbook/preview",
     description: "Eigenvalues, Cayley-Hamilton theorem, multivariable Taylor expansion, Jacobians, and vector calculus.",
-    instructor: "Prof. S. R. Ramanathan"
+    instructor: "Dr. B. Naga Malleswari"
   },
   {
     code: "25BS1CH101",
-    title: "Chemistry for Engineers",
-    shortTitle: "Chemistry",
+    title: "Chemistry for Engineers (CFE)",
+    shortTitle: "CFE",
     category: "Theory",
     credits: 3,
     syllabusUrl: "https://drive.google.com/file/d/cse-sem1-eng-chem-syllabus/preview",
     pyqUrl: "https://drive.google.com/drive/folders/cse-pyq-25BS1CH101",
-    lectureSlidesUrl: "https://drive.google.com/drive/folders/cse-slides-25BS1CH101",
-    labManualUrl: "https://drive.google.com/file/d/cse-chem-cheatsheet/preview",
     description: "Thermodynamics, electrochemistry, polymer composites, battery chemistry, and engineering nanomaterials.",
-    instructor: "Dr. Ananya Mukherjee"
+    instructor: "Dr. S. Rambabu"
   },
   {
     code: "25ES1EE101",
-    title: "Basic Electrical Engineering",
+    title: "Basic Electrical Engineering (BEE)",
     shortTitle: "BEE",
     category: "Theory",
     credits: 3,
     syllabusUrl: "https://drive.google.com/file/d/cse-sem1-bee-syllabus/preview",
     pyqUrl: "https://drive.google.com/drive/folders/cse-pyq-25ES1EE101",
-    lectureSlidesUrl: "https://drive.google.com/drive/folders/cse-slides-25ES1EE101",
-    labManualUrl: "https://drive.google.com/file/d/cse-bee-circuit-theorems/preview",
     description: "DC & AC circuit analysis, Kirchhoff laws, Thevenin theorem, single-phase transformers, and 3-phase induction motors.",
-    instructor: "Prof. K. Venkatesh"
+    instructor: "Dr. K. Veeresham"
   },
   {
     code: "25ES1CS101",
-    title: "Programming for Problem Solving",
+    title: "Programming for Problem Solving (PPS)",
     shortTitle: "PPS",
     category: "Theory",
     credits: 3,
     syllabusUrl: "https://drive.google.com/file/d/cse-sem1-pps-syllabus/preview",
     pyqUrl: "https://drive.google.com/drive/folders/cse-pyq-25ES1CS101",
-    lectureSlidesUrl: "https://drive.google.com/drive/folders/cse-slides-25ES1CS101",
-    labManualUrl: "https://github.com/cse-cohort-2026/pps-c-lecture-code",
     description: "Structured programming in C, pointers, memory allocation, recursion, structures, and file handling.",
-    instructor: "Prof. Rajesh K. Sharma"
+    instructor: "Dr. V. Baby"
   },
   {
     code: "25ES3ME101",
-    title: "Engineering Drawing",
-    shortTitle: "Engg Drawing",
+    title: "Engineering Drawing (ED)",
+    shortTitle: "ED",
     category: "Drawing",
     credits: 3,
     syllabusUrl: "https://drive.google.com/file/d/cse-sem1-drawing-syllabus/preview",
     pyqUrl: "https://drive.google.com/drive/folders/cse-pyq-25ES3ME101",
-    lectureSlidesUrl: "https://drive.google.com/drive/folders/cse-slides-25ES3ME101",
-    labManualUrl: "https://drive.google.com/file/d/cse-autocad-drawing-sheets/preview",
     description: "Orthographic projections, isometric projections, sections of solids, development of surfaces, and CAD drafting.",
-    instructor: "Prof. M. B. Patil"
+    instructor: "Mr. M. Krishna / Dr. GVL Prasad / Mr. Mohamad Aziz Athani"
   },
   {
     code: "25BS2CH101",
-    title: "Engineering Chemistry Laboratory",
-    shortTitle: "Chem Lab",
+    title: "Engineering Chemistry Laboratory (EC LAB)",
+    shortTitle: "EC LAB",
     category: "Lab",
     credits: 1,
     syllabusUrl: "https://drive.google.com/file/d/cse-sem1-chemlab-syllabus/preview",
     pyqUrl: "https://drive.google.com/drive/folders/cse-pyq-25BS2CH101",
-    lectureSlidesUrl: "https://drive.google.com/drive/folders/cse-chemlab-viva-prep",
-    labManualUrl: "https://drive.google.com/file/d/cse-25BS2CH101-lab-manual/preview",
     description: "Practical titrations, total hardness of water by EDTA, conductometric analysis, and Redwood viscometer experiments.",
-    instructor: "Dr. Ananya Mukherjee"
+    instructor: "Dr. S. Rambabu / Dr. S. Pratyusha / Dr. N. Mamatha"
   },
   {
     code: "25ES2CS101",
-    title: "Programming for Problem Solving Laboratory",
-    shortTitle: "PPS Lab",
+    title: "Programming for Problem Solving Laboratory (PPS LAB)",
+    shortTitle: "PPS LAB",
     category: "Lab",
     credits: 1,
     syllabusUrl: "https://drive.google.com/file/d/cse-sem1-ppslab-syllabus/preview",
     pyqUrl: "https://drive.google.com/drive/folders/cse-pyq-25ES2CS101",
-    lectureSlidesUrl: "https://github.com/cse-cohort-2026/pps-lab-solutions",
-    labManualUrl: "https://drive.google.com/file/d/cse-25ES2CS101-lab-manual-complete/preview",
     description: "Hands-on programming in C: 12 syllabus experiments from control flow to pointers, file processing, and data structures.",
-    instructor: "Prof. Rajesh K. Sharma"
+    instructor: "Dr. V. Baby / Ms. M. Mohana Deepthi / Ms. A. Sandhya Rani"
   },
   {
     code: "25ES2IT101",
-    title: "IT Workshop",
-    shortTitle: "IT Workshop",
+    title: "IT Workshop (ITW)",
+    shortTitle: "ITW",
     category: "Lab",
     credits: 1,
     syllabusUrl: "https://drive.google.com/file/d/cse-sem1-it-workshop-syllabus/preview",
     pyqUrl: "https://drive.google.com/drive/folders/cse-pyq-25ES2IT101",
-    lectureSlidesUrl: "https://drive.google.com/drive/folders/cse-itworkshop-guides",
-    labManualUrl: "https://drive.google.com/file/d/cse-it-workshop-lab-manual/preview",
     description: "PC assembly, Linux installation, dual-boot setups, Git version control workflows, and scientific documentation using LaTeX.",
-    instructor: "Er. Sandeep Nair"
+    instructor: "Mr. K. Prathap Joshi / Ms. M. Srijitha / Ms. Sana Inayath"
   },
   {
     code: "25ES2EE101",
-    title: "Basic Electrical Engineering Laboratory",
-    shortTitle: "BEE Lab",
+    title: "Basic Electrical Engineering Laboratory (BEE LAB)",
+    shortTitle: "BEE LAB",
     category: "Lab",
     credits: 1,
     syllabusUrl: "https://drive.google.com/file/d/cse-sem1-beelab-syllabus/preview",
     pyqUrl: "https://drive.google.com/drive/folders/cse-pyq-25ES2EE101",
-    lectureSlidesUrl: "https://drive.google.com/drive/folders/cse-beelab-viva",
-    labManualUrl: "https://drive.google.com/file/d/cse-25ES2EE101-lab-manual/preview",
     description: "Hardware verification of Ohm and Kirchhoff laws, Superposition theorem, OC/SC tests on transformers, and power factor correction.",
-    instructor: "Prof. K. Venkatesh"
+    instructor: "Dr. O. Sobhana / Dr. E. Shiva Prasad"
+  },
+  {
+    code: "25MN6HS101",
+    title: "Induction Programme (IP)",
+    shortTitle: "IP",
+    category: "Theory",
+    credits: 0,
+    syllabusUrl: "https://drive.google.com/file/d/cse-sem1-induction-programme/preview",
+    description: "Student orientation, universal human values, creative arts, and institute culture.",
+    instructor: "Mrs. K. Jyothsna Latha"
   }
 ];
 var memoryCourses = JSON.parse(JSON.stringify(SEED_COURSES));
 var memoryNotices = [];
+var INITIAL_TIMETABLE_CONFIG = {
+  cohortName: "VNR VJIET \u2014 Dept of Computer Science & Engineering",
+  section: "Section B (Class Room E-139)",
+  academicYear: "2026-27 (w.e.f: 05/08/2026)",
+  lastUpdated: (/* @__PURE__ */ new Date()).toISOString(),
+  schedule: {
+    Monday: [
+      { id: "mon-1-2", time: "09:00 - 11:00", code: "25ES3ME101", subject: "Engineering Drawing (ED)", room: "E-030/031", instructor: "Mr. M. Krishna / Dr. GVL Prasad", type: "Drawing" },
+      { id: "mon-3", time: "11:00 - 12:00", code: "STUDY", subject: "Self Study / Tutorial Preparation", room: "E-139", instructor: "Ms. M. Mohana Deepthi (Coordinator)", type: "Tutorial" },
+      { id: "mon-lnc", time: "12:00 - 12:40", code: "LUNCH", subject: "Lunch Break", room: "Campus Food Court", type: "Break" },
+      { id: "mon-4", time: "12:40 - 01:40", code: "25ES1CS101", subject: "Programming for Problem Solving (PPS)", room: "E-139", instructor: "Dr. V. Baby", type: "Theory" },
+      { id: "mon-5", time: "01:40 - 02:40", code: "ECA", subject: "Extra Curricular Activities (Sports / ECA)", room: "Sports Complex / Activity Hall", type: "Tutorial" },
+      { id: "mon-6", time: "02:40 - 03:40", code: "CCA", subject: "Co-Curricular Activities (CCA Club Sessions)", room: "E-139", type: "Tutorial" }
+    ],
+    Tuesday: [
+      { id: "tue-1-2", time: "09:00 - 11:00", code: "25BS2CH101 / 25ES2EE101", subject: "EC Lab / BEE Lab (Batch 1: EC Lab | Batch 2: BEE Lab)", room: "B-308 / P-014", instructor: "Dr. S. Rambabu / Dr. O. Sobhana / Dr. E. Shiva Prasad", type: "Lab" },
+      { id: "tue-3", time: "11:00 - 12:00", code: "25BS1CH101", subject: "Chemistry for Engineers (CFE)", room: "E-139", instructor: "Dr. S. Rambabu", type: "Theory" },
+      { id: "tue-lnc", time: "12:00 - 12:40", code: "LUNCH", subject: "Lunch Break", room: "Campus Food Court", type: "Break" },
+      { id: "tue-4", time: "12:40 - 01:40", code: "25ES1CS101", subject: "Programming for Problem Solving (PPS)", room: "E-139", instructor: "Dr. V. Baby", type: "Theory" },
+      { id: "tue-5", time: "01:40 - 02:40", code: "MTP", subject: "Mentoring Training & Placements (MTP)", room: "E-139", instructor: "CSE Faculty Mentors", type: "Tutorial" },
+      { id: "tue-6", time: "02:40 - 03:40", code: "SPORTS", subject: "Sports & Physical Conditioning", room: "College Grounds", type: "Tutorial" }
+    ],
+    Wednesday: [
+      { id: "wed-1-2", time: "09:00 - 11:00", code: "25ES2CS101 / 25BS2CH101", subject: "PPS Lab / EC Lab (Batch 1: PPS Lab | Batch 2: EC Lab)", room: "E-103 / B-308", instructor: "Dr. V. Baby / Ms. M. Mohana Deepthi / Dr. S. Rambabu", type: "Lab" },
+      { id: "wed-3", time: "11:00 - 12:00", code: "25BS1MT101", subject: "Matrices and Calculus (MAC)", room: "E-139", instructor: "Dr. B. Naga Malleswari", type: "Theory" },
+      { id: "wed-lnc", time: "12:00 - 12:40", code: "LUNCH", subject: "Lunch Break", room: "Campus Food Court", type: "Break" },
+      { id: "wed-4", time: "12:40 - 01:40", code: "STUDY", subject: "Self Study / Problem Walkthrough", room: "E-139", type: "Tutorial" },
+      { id: "wed-5", time: "01:40 - 02:40", code: "25ES3ME101", subject: "Engineering Drawing (ED)", room: "E-030/031", instructor: "Mr. M. Krishna / Dr. GVL Prasad", type: "Drawing" },
+      { id: "wed-6", time: "02:40 - 03:40", code: "STUDY", subject: "Revision & Peer Learning Hours", room: "E-139", type: "Tutorial" }
+    ],
+    Thursday: [
+      { id: "thu-1", time: "09:00 - 10:00", code: "25BS1MT101", subject: "Matrices and Calculus (MAC)", room: "E-139", instructor: "Dr. B. Naga Malleswari", type: "Theory" },
+      { id: "thu-2", time: "10:00 - 11:00", code: "25ES1CS101", subject: "Programming for Problem Solving (PPS)", room: "E-139", instructor: "Dr. V. Baby", type: "Theory" },
+      { id: "thu-3", time: "11:00 - 12:00", code: "25ES1EE101", subject: "Basic Electrical Engineering (BEE)", room: "E-139", instructor: "Dr. K. Veeresham", type: "Theory" },
+      { id: "thu-lnc", time: "12:00 - 12:40", code: "LUNCH", subject: "Lunch Break", room: "Campus Food Court", type: "Break" },
+      { id: "thu-4", time: "12:40 - 01:40", code: "25BS1CH101", subject: "Chemistry for Engineers (CFE)", room: "E-139", instructor: "Dr. S. Rambabu", type: "Theory" },
+      { id: "thu-5-6", time: "01:40 - 03:40", code: "LIBRARY", subject: "Central Library Reference & Research Hours", room: "Central Library", type: "Tutorial" }
+    ],
+    Friday: [
+      { id: "fri-1", time: "09:00 - 10:00", code: "25ES1CS101", subject: "Programming for Problem Solving (PPS)", room: "E-139", instructor: "Dr. V. Baby", type: "Theory" },
+      { id: "fri-2", time: "10:00 - 11:00", code: "25BS1CH101", subject: "Chemistry for Engineers (CFE)", room: "E-139", instructor: "Dr. S. Rambabu", type: "Theory" },
+      { id: "fri-3", time: "11:00 - 12:00", code: "25BS1MT101", subject: "Matrices and Calculus (MAC)", room: "E-139", instructor: "Dr. B. Naga Malleswari", type: "Theory" },
+      { id: "fri-lnc", time: "12:00 - 12:40", code: "LUNCH", subject: "Lunch Break", room: "Campus Food Court", type: "Break" },
+      { id: "fri-4", time: "12:40 - 01:40", code: "25ES1EE101", subject: "Basic Electrical Engineering (BEE)", room: "E-139", instructor: "Dr. K. Veeresham", type: "Theory" },
+      { id: "fri-5-6", time: "01:40 - 03:40", code: "25ES2EE101 / 25ES2CS101", subject: "BEE Lab / PPS Lab (Batch 1: BEE Lab | Batch 2: PPS Lab)", room: "P-014 / E-103", instructor: "Dr. O. Sobhana / Dr. E. Shiva Prasad / Dr. V. Baby", type: "Lab" }
+    ],
+    Saturday: [
+      { id: "sat-1", time: "09:00 - 10:00", code: "25BS1CH101", subject: "Chemistry for Engineers (CFE)", room: "E-139", instructor: "Dr. S. Rambabu", type: "Theory" },
+      { id: "sat-2", time: "10:00 - 11:00", code: "25BS1MT101", subject: "Matrices and Calculus (MAC)", room: "E-139", instructor: "Dr. B. Naga Malleswari", type: "Theory" },
+      { id: "sat-3", time: "11:00 - 12:00", code: "25ES1EE101", subject: "Basic Electrical Engineering (BEE)", room: "E-139", instructor: "Dr. K. Veeresham", type: "Theory" },
+      { id: "sat-lnc", time: "12:00 - 12:40", code: "LUNCH", subject: "Lunch Break", room: "Campus Food Court", type: "Break" },
+      { id: "sat-4", time: "12:40 - 01:40", code: "STUDY", subject: "Self Study / Seminar Preparation", room: "E-139", type: "Tutorial" },
+      { id: "sat-5", time: "01:40 - 02:40", code: "25ES2IT101", subject: "IT Workshop (ITW)", room: "E-115/116", instructor: "Mr. K. Prathap Joshi / Ms. M. Srijitha / Ms. Sana Inayath", type: "Lab" },
+      { id: "sat-6", time: "02:40 - 03:40", code: "CVA-L1", subject: "Career Vision Approach - Level 1 (CVA-L1)", room: "E-139", instructor: "Mrs. P. Prasanna", type: "Tutorial" }
+    ]
+  }
+};
+var currentTimetable = JSON.parse(JSON.stringify(INITIAL_TIMETABLE_CONFIG));
 if (MONGO_URI) {
   mongoose.connect(MONGO_URI).then(() => {
     console.log("Connected to MongoDB database successfully.");
@@ -438,6 +488,38 @@ app.get("/api/admin/verify", authMiddleware, (req, res) => {
 });
 app.get("/api/courses", (_req, res) => {
   return res.json({ success: true, count: memoryCourses.length, courses: memoryCourses });
+});
+app.get("/api/timetable", (_req, res) => {
+  return res.json({ success: true, timetable: currentTimetable });
+});
+app.put("/api/timetable", authMiddleware, (req, res) => {
+  const { schedule, cohortName, section, academicYear } = req.body;
+  if (!schedule || typeof schedule !== "object") {
+    return res.status(400).json({ success: false, message: "Invalid schedule format provided." });
+  }
+  currentTimetable = {
+    cohortName: cohortName || currentTimetable.cohortName,
+    section: section || currentTimetable.section,
+    academicYear: academicYear || currentTimetable.academicYear,
+    lastUpdated: (/* @__PURE__ */ new Date()).toISOString(),
+    schedule
+  };
+  recordSecurityAudit("TIMETABLE_UPDATED", getClientIp(req), `Timetable updated for ${currentTimetable.section}`, "success", req.headers["user-agent"]);
+  return res.json({
+    success: true,
+    message: "Timetable updated successfully.",
+    timetable: currentTimetable
+  });
+});
+app.post("/api/timetable/reset", authMiddleware, (req, res) => {
+  currentTimetable = JSON.parse(JSON.stringify(INITIAL_TIMETABLE_CONFIG));
+  currentTimetable.lastUpdated = (/* @__PURE__ */ new Date()).toISOString();
+  recordSecurityAudit("TIMETABLE_RESET", getClientIp(req), "Timetable reset to factory defaults", "warning", req.headers["user-agent"]);
+  return res.json({
+    success: true,
+    message: "Timetable restored to factory defaults.",
+    timetable: currentTimetable
+  });
 });
 app.get("/api/notices", (req, res) => {
   const { category, courseCode, search } = req.query;

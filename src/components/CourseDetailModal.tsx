@@ -9,7 +9,6 @@ import {
   BookOpen, 
   FileText, 
   HelpCircle, 
-  Presentation, 
   ExternalLink, 
   Check, 
   ChevronRight,
@@ -114,20 +113,7 @@ export const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
             <HelpCircle className="w-3 h-3 text-amber-500" />
             <span>PYQ Papers</span>
           </button>
-          <button
-            onClick={() => handleResourceOpen(`${detail.shortTitle} Lecture Slides`, detail.resources.lectureSlidesUrl)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-colors"
-          >
-            <Presentation className="w-3 h-3 text-emerald-500" />
-            <span>Lecture Slides</span>
-          </button>
-          <button
-            onClick={() => handleResourceOpen(`${detail.shortTitle} Lab Manual / Notes`, detail.resources.labManualUrl)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-colors"
-          >
-            <BookOpen className="w-3 h-3 text-purple-500" />
-            <span>Handbook / Manual</span>
-          </button>
+
         </div>
 
         {/* Tab Controls */}

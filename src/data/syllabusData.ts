@@ -25,8 +25,6 @@ export interface CourseDetail {
   resources: {
     syllabusUrl: string;
     pyqUrl: string;
-    lectureSlidesUrl: string;
-    labManualUrl: string;
   };
 }
 
@@ -108,8 +106,6 @@ export const SEMESTER_1_DETAILED_COURSES: Record<string, CourseDetail> = {
     resources: {
       syllabusUrl: 'https://drive.google.com/file/d/cse-sem1-matrices-calculus-syllabus/preview',
       pyqUrl: 'https://drive.google.com/drive/folders/cse-pyq-25BS1MT101',
-      lectureSlidesUrl: 'https://drive.google.com/drive/folders/cse-slides-25BS1MT101',
-      labManualUrl: 'https://drive.google.com/file/d/cse-25BS1MT101-formula-handbook/preview',
     },
   },
   '25BS1CH101': {
@@ -186,8 +182,6 @@ export const SEMESTER_1_DETAILED_COURSES: Record<string, CourseDetail> = {
     resources: {
       syllabusUrl: 'https://drive.google.com/file/d/cse-sem1-eng-chem-syllabus/preview',
       pyqUrl: 'https://drive.google.com/drive/folders/cse-pyq-25BS1CH101',
-      lectureSlidesUrl: 'https://drive.google.com/drive/folders/cse-slides-25BS1CH101',
-      labManualUrl: 'https://drive.google.com/file/d/cse-chem-cheatsheet/preview',
     },
   },
   '25ES1EE101': {
@@ -265,8 +259,6 @@ export const SEMESTER_1_DETAILED_COURSES: Record<string, CourseDetail> = {
     resources: {
       syllabusUrl: 'https://drive.google.com/file/d/cse-sem1-bee-syllabus/preview',
       pyqUrl: 'https://drive.google.com/drive/folders/cse-pyq-25ES1EE101',
-      lectureSlidesUrl: 'https://drive.google.com/drive/folders/cse-slides-25ES1EE101',
-      labManualUrl: 'https://drive.google.com/file/d/cse-bee-circuit-theorems/preview',
     },
   },
   '25ES1CS101': {
@@ -343,8 +335,6 @@ export const SEMESTER_1_DETAILED_COURSES: Record<string, CourseDetail> = {
     resources: {
       syllabusUrl: 'https://drive.google.com/file/d/cse-sem1-pps-syllabus/preview',
       pyqUrl: 'https://drive.google.com/drive/folders/cse-pyq-25ES1CS101',
-      lectureSlidesUrl: 'https://drive.google.com/drive/folders/cse-slides-25ES1CS101',
-      labManualUrl: 'https://github.com/cse-cohort-2026/pps-c-lecture-code',
     },
   },
   '25ES3ME101': {
@@ -421,8 +411,6 @@ export const SEMESTER_1_DETAILED_COURSES: Record<string, CourseDetail> = {
     resources: {
       syllabusUrl: 'https://drive.google.com/file/d/cse-sem1-drawing-syllabus/preview',
       pyqUrl: 'https://drive.google.com/drive/folders/cse-pyq-25ES3ME101',
-      lectureSlidesUrl: 'https://drive.google.com/drive/folders/cse-slides-25ES3ME101',
-      labManualUrl: 'https://drive.google.com/file/d/cse-autocad-drawing-sheets/preview',
     },
   },
   '25BS2CH101': {
@@ -435,7 +423,7 @@ export const SEMESTER_1_DETAILED_COURSES: Record<string, CourseDetail> = {
     room: 'Chemistry Lab B-12',
     evaluationScheme: 'Day-to-day Record (40%) + Viva (20%) + Practical Exam (40%)',
     textbooks: ['Vogel’s Textbook of Quantitative Chemical Analysis'],
-    referenceBooks: ['Laboratory Manual of Engineering Chemistry by Dr. Sudha Rani'],
+    referenceBooks: ['Practical Engineering Chemistry by Dr. Sudha Rani'],
     units: [
       {
         unitNumber: 1,
@@ -463,8 +451,6 @@ export const SEMESTER_1_DETAILED_COURSES: Record<string, CourseDetail> = {
     resources: {
       syllabusUrl: 'https://drive.google.com/file/d/cse-sem1-chemlab-syllabus/preview',
       pyqUrl: 'https://drive.google.com/drive/folders/cse-pyq-25BS2CH101',
-      lectureSlidesUrl: 'https://drive.google.com/drive/folders/cse-chemlab-viva-prep',
-      labManualUrl: 'https://drive.google.com/file/d/cse-25BS2CH101-lab-manual/preview',
     },
   },
   '25ES2CS101': {
@@ -509,8 +495,6 @@ export const SEMESTER_1_DETAILED_COURSES: Record<string, CourseDetail> = {
     resources: {
       syllabusUrl: 'https://drive.google.com/file/d/cse-sem1-ppslab-syllabus/preview',
       pyqUrl: 'https://drive.google.com/drive/folders/cse-pyq-25ES2CS101',
-      lectureSlidesUrl: 'https://github.com/cse-cohort-2026/pps-lab-solutions',
-      labManualUrl: 'https://drive.google.com/file/d/cse-25ES2CS101-lab-manual-complete/preview',
     },
   },
   '25ES2IT101': {
@@ -522,7 +506,7 @@ export const SEMESTER_1_DETAILED_COURSES: Record<string, CourseDetail> = {
     instructor: 'Er. Sandeep Nair',
     room: 'Hardware & Systems Lab 1',
     evaluationScheme: 'Hands-on Execution (50%) + Task Documentation (20%) + Practical Exam (30%)',
-    textbooks: ['IT Workshop Lab Manual (Dept. of CSE)'],
+    textbooks: ['IT Workshop Practical Guide (Dept. of CSE)'],
     referenceBooks: ['Pro Git by Scott Chacon & Ben Straub', 'The Linux Command Line by William Shotts'],
     units: [
       {
@@ -551,8 +535,6 @@ export const SEMESTER_1_DETAILED_COURSES: Record<string, CourseDetail> = {
     resources: {
       syllabusUrl: 'https://drive.google.com/file/d/cse-sem1-it-workshop-syllabus/preview',
       pyqUrl: 'https://drive.google.com/drive/folders/cse-pyq-25ES2IT101',
-      lectureSlidesUrl: 'https://drive.google.com/drive/folders/cse-itworkshop-guides',
-      labManualUrl: 'https://drive.google.com/file/d/cse-it-workshop-lab-manual/preview',
     },
   },
   '25ES2EE101': {
@@ -564,7 +546,7 @@ export const SEMESTER_1_DETAILED_COURSES: Record<string, CourseDetail> = {
     instructor: 'Prof. K. Venkatesh',
     room: 'Machines Lab B-04',
     evaluationScheme: 'Lab Records (40%) + Viva Voce (20%) + Circuit Wiring Exam (40%)',
-    textbooks: ['Laboratory Manual for Basic Electrical Engineering'],
+    textbooks: ['Practical Guide for Basic Electrical Engineering'],
     referenceBooks: ['Experiments in Electrical Engineering by M.A. Salaria'],
     units: [
       {
@@ -593,8 +575,6 @@ export const SEMESTER_1_DETAILED_COURSES: Record<string, CourseDetail> = {
     resources: {
       syllabusUrl: 'https://drive.google.com/file/d/cse-sem1-beelab-syllabus/preview',
       pyqUrl: 'https://drive.google.com/drive/folders/cse-pyq-25ES2EE101',
-      lectureSlidesUrl: 'https://drive.google.com/drive/folders/cse-beelab-viva',
-      labManualUrl: 'https://drive.google.com/file/d/cse-25ES2EE101-lab-manual/preview',
     },
   },
 };

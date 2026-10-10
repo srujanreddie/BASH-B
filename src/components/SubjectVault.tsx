@@ -7,8 +7,6 @@ import React, { useState } from 'react';
 import { 
   FileText, 
   HelpCircle, 
-  Presentation, 
-  BookOpen, 
   Filter, 
   Check, 
   ExternalLink,
@@ -72,7 +70,7 @@ export const SubjectVault: React.FC<SubjectVaultProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-500 hidden sm:block">
-                Tap any course card to filter feed deadlines. Access official syllabus, PYQs, slides, and manuals.
+                Tap any course card to filter feed deadlines. Access official syllabus copy and previous year question papers.
               </p>
             </div>
           </div>
@@ -213,46 +211,6 @@ export const SubjectVault: React.FC<SubjectVaultProps> = ({
                       </button>
                     )}
 
-                    {course.lectureSlidesUrl && (
-                      <button
-                        type="button"
-                        onClick={(e) =>
-                          handleResourceClick(e, `${course.shortTitle} Lecture Slides`, course.lectureSlidesUrl, course.code)
-                        }
-                        className={`inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium rounded transition-colors whitespace-nowrap ${
-                          isSelected
-                            ? 'bg-white/10 hover:bg-white/20 text-slate-100'
-                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                        }`}
-                        title="Faculty Lecture Slides & Handouts"
-                      >
-                        <Presentation className="w-3 h-3 text-emerald-500 shrink-0" />
-                        <span>Slides</span>
-                      </button>
-                    )}
-
-                    {course.labManualUrl && (
-                      <button
-                        type="button"
-                        onClick={(e) =>
-                          handleResourceClick(
-                            e,
-                            `${course.shortTitle} Lab Manual / Handbook`,
-                            course.labManualUrl,
-                            course.code
-                          )
-                        }
-                        className={`inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium rounded transition-colors whitespace-nowrap ${
-                          isSelected
-                            ? 'bg-white/10 hover:bg-white/20 text-slate-100'
-                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                        }`}
-                        title="Lab Manual & Practical Guides"
-                      >
-                        <BookOpen className="w-3 h-3 text-purple-500 shrink-0" />
-                        <span>Lab Manual</span>
-                      </button>
-                    )}
 
                     <div className="ml-auto flex items-center gap-1.5">
                       {onOpenCourseDetail && (
