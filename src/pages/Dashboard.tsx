@@ -30,21 +30,24 @@ import {
   EyeOff,
   Radio,
   FileCheck2,
-  GraduationCap
+  GraduationCap,
+  ListTodo
 } from 'lucide-react';
-import { Course, Notice, SecurityAuditLog } from '../types';
+import { Course, Notice, Assignment, SecurityAuditLog } from '../types';
 import { safeFetchJson } from '../utils/api';
 import { SEED_COURSES, DEFAULT_NOTICES } from '../data/seedCourses';
 import { TimetableManager } from '../components/TimetableManager';
+import { AssignmentManager } from '../components/AssignmentManager';
 import ThemeToggle from '../components/ThemeToggle';
 import BashBLogo from '../components/BashBLogo';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'notices' | 'timetable' | 'security'>(() => {
+  const [activeTab, setActiveTab] = useState<'notices' | 'timetable' | 'assignments' | 'security'>(() => {
     try {
       const params = new URLSearchParams(window.location.search);
       if (params.get('tab') === 'timetable') return 'timetable';
+      if (params.get('tab') === 'assignments') return 'assignments';
       if (params.get('tab') === 'security') return 'security';
     } catch {
       // ignore
@@ -52,6 +55,7 @@ export const Dashboard: React.FC = () => {
     return 'notices';
   });
   const [courses, setCourses] = useState<Course[]>(() => SEED_COURSES);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [notices, setNotices] = useState<Notice[]>(() => {
     try {
       const cached = localStorage.getItem('cse_sem1_cached_notices');
@@ -140,9 +144,10 @@ export const Dashboard: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const [coursesRes, noticesRes] = await Promise.all([
+      const [coursesRes, noticesRes, assignmentsRes] = await Promise.all([
         safeFetchJson<{ success: boolean; courses: Course[] }>('/api/courses'),
         safeFetchJson<{ success: boolean; notices: Notice[] }>('/api/notices'),
+        safeFetchJson<{ success: boolean; assignments: Assignment[] }>('/api/assignments'),
       ]);
 
       if (coursesRes.ok && coursesRes.data?.courses && coursesRes.data.courses.length > 0) {
@@ -158,6 +163,9 @@ export const Dashboard: React.FC = () => {
         } catch {
           // ignore
         }
+      }
+      if (assignmentsRes.ok && assignmentsRes.data?.assignments) {
+        setAssignments(assignmentsRes.data.assignments);
       }
     } catch (err: any) {
       console.warn('Backend sync deferred, continuing with cached session state:', err);
@@ -658,6 +666,23 @@ export const Dashboard: React.FC = () => {
               Live B
             </span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('assignments')}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === 'assignments'
+                ? 'bg-[#c4f510] text-zinc-950 shadow-xs scale-102 ring-2 ring-[#c4f510]/50'
+                : 'bg-white dark:bg-[#1e1e1e] hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-800 shadow-2xs'
+            }`}
+          >
+            <ListTodo className="w-3.5 h-3.5" />
+            <span>Assignment Manager</span>
+            <span className={`text-[11px] px-2 py-0.2 rounded-full font-mono font-bold ${
+              activeTab === 'assignments' ? 'bg-zinc-950 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
+            }`}>
+              {assignments.length}
+            </span>
+          </button>
         </div>
 
         {activeTab === 'timetable' ? (
@@ -668,6 +693,15 @@ export const Dashboard: React.FC = () => {
               if (type === 'success') setSuccessMsg(msg);
               else setError(msg);
             }}
+          />
+        ) : activeTab === 'assignments' ? (
+          <AssignmentManager
+            assignments={assignments}
+            courses={courses}
+            token={token}
+            onRefresh={fetchData}
+            onShowMessage={(msg) => setSuccessMsg(msg)}
+            onShowError={(err) => setError(err)}
           />
         ) : (
           <>

@@ -12,17 +12,20 @@ import {
   RefreshCw, 
   X,
   Sparkles,
-  Layers
+  Layers,
+  ListTodo,
+  LayoutGrid
 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import NoticeFeed from '../components/NoticeFeed';
+import AssignmentTracker from '../components/AssignmentTracker';
 import ThemeToggle from '../components/ThemeToggle';
 import BashBLogo from '../components/BashBLogo';
 import ResourceViewerModal from '../components/ResourceViewerModal';
 import CourseDetailModal from '../components/CourseDetailModal';
 import CohortTimetableModal from '../components/CohortTimetableModal';
 import QuickPrintModal from '../components/QuickPrintModal';
-import { Course, Notice, CategoryFilter } from '../types';
+import { Course, Notice, Assignment, CategoryFilter } from '../types';
 import { safeFetchJson } from '../utils/api';
 import { SEED_COURSES, DEFAULT_NOTICES } from '../data/seedCourses';
 
@@ -53,6 +56,20 @@ export const Home: React.FC = () => {
     return DEFAULT_NOTICES;
   });
 
+  const [assignments, setAssignments] = useState<Assignment[]>(() => {
+    try {
+      const stored = localStorage.getItem('cse_sem1_cached_assignments');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // ignore
+    }
+    return [];
+  });
+
+  const [activeMainTab, setActiveMainTab] = useState<'feed' | 'assignments'>('feed');
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -102,14 +119,24 @@ export const Home: React.FC = () => {
     courseCode: '',
   });
 
+  const pendingAssignmentsCount = useMemo(() => {
+    try {
+      const checklist = JSON.parse(localStorage.getItem('cse_section_b_assignment_checklist') || '{}');
+      return assignments.filter((a) => !checklist[a.id]?.completed).length;
+    } catch {
+      return assignments.length;
+    }
+  }, [assignments]);
+
   const loadData = async (isBackground = false) => {
     if (!isBackground) setLoading(true);
     else setRefreshing(true);
 
     try {
-      const [coursesRes, noticesRes] = await Promise.all([
+      const [coursesRes, noticesRes, assignmentsRes] = await Promise.all([
         safeFetchJson<{ success: boolean; courses: Course[] }>('/api/courses'),
         safeFetchJson<{ success: boolean; notices: Notice[] }>('/api/notices'),
+        safeFetchJson<{ success: boolean; assignments: Assignment[] }>('/api/assignments'),
       ]);
 
       if (coursesRes.ok && coursesRes.data?.courses && coursesRes.data.courses.length > 0) {
@@ -124,6 +151,14 @@ export const Home: React.FC = () => {
         setNotices(noticesRes.data.notices);
         try {
           localStorage.setItem('cse_sem1_cached_notices', JSON.stringify(noticesRes.data.notices));
+        } catch {
+          // ignore
+        }
+      }
+      if (assignmentsRes.ok && assignmentsRes.data?.assignments) {
+        setAssignments(assignmentsRes.data.assignments);
+        try {
+          localStorage.setItem('cse_sem1_cached_assignments', JSON.stringify(assignmentsRes.data.assignments));
         } catch {
           // ignore
         }
@@ -240,6 +275,12 @@ export const Home: React.FC = () => {
         }}
         isOpenMobile={mobileMenuOpen}
         onCloseMobile={() => setMobileMenuOpen(false)}
+        activeMainTab={activeMainTab}
+        onSelectMainTab={(tab) => {
+          setActiveMainTab(tab);
+          setMobileMenuOpen(false);
+        }}
+        pendingAssignmentsCount={pendingAssignmentsCount}
       />
 
       {/* 2. Main Content Area */}
@@ -294,27 +335,72 @@ export const Home: React.FC = () => {
 
         {/* Notice Feed Container */}
         <main className="flex-1 p-3 sm:p-5 lg:p-7 max-w-7xl w-full mx-auto">
-          <NoticeFeed
-            notices={filteredNotices}
-            courses={courses}
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-            selectedCourseCode={selectedCourseCode}
-            onSelectCourseCode={setSelectedCourseCode}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            hideCompleted={hideCompleted}
-            onToggleHideCompleted={() => setHideCompleted(!hideCompleted)}
-            onlyStarred={onlyStarred}
-            onToggleOnlyStarred={() => setOnlyStarred(!onlyStarred)}
-            completedMap={completedMap}
-            onToggleComplete={handleToggleComplete}
-            starredMap={starredMap}
-            onToggleStar={handleToggleStar}
-            onOpenResourcePreview={handleOpenResource}
-            onOpenPrintSheet={() => setIsPrintOpen(true)}
-            onOpenTimetable={() => setIsTimetableOpen(true)}
-          />
+          {/* Top Primary View Switcher: Noticeboard vs Assignment Tracker */}
+          <div className="flex items-center gap-2 mb-6 p-1.5 bg-zinc-200/80 dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 rounded-2xl w-fit shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setActiveMainTab('feed')}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
+                activeMainTab === 'feed'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
+              }`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span>Noticeboard & Schedule</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveMainTab('assignments')}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
+                activeMainTab === 'assignments'
+                  ? 'bg-[#c4f510] text-zinc-950 shadow-xs'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
+              }`}
+            >
+              <ListTodo className="w-4 h-4" />
+              <span>Assignment Checklist</span>
+              {pendingAssignmentsCount > 0 && (
+                <span className={`text-[10px] font-black px-1.5 py-0.2 rounded-full ${
+                  activeMainTab === 'assignments' ? 'bg-zinc-950 text-[#c4f510]' : 'bg-[#c4f510] text-zinc-950'
+                }`}>
+                  {pendingAssignmentsCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {activeMainTab === 'feed' ? (
+            <NoticeFeed
+              notices={filteredNotices}
+              courses={courses}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+              selectedCourseCode={selectedCourseCode}
+              onSelectCourseCode={setSelectedCourseCode}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              hideCompleted={hideCompleted}
+              onToggleHideCompleted={() => setHideCompleted(!hideCompleted)}
+              onlyStarred={onlyStarred}
+              onToggleOnlyStarred={() => setOnlyStarred(!onlyStarred)}
+              completedMap={completedMap}
+              onToggleComplete={handleToggleComplete}
+              starredMap={starredMap}
+              onToggleStar={handleToggleStar}
+              onOpenResourcePreview={handleOpenResource}
+              onOpenPrintSheet={() => setIsPrintOpen(true)}
+              onOpenTimetable={() => setIsTimetableOpen(true)}
+            />
+          ) : (
+            <AssignmentTracker
+              assignments={assignments}
+              courses={courses}
+              selectedCourseCode={selectedCourseCode}
+              onSelectCourseCode={setSelectedCourseCode}
+              onRefresh={() => loadData(true)}
+            />
+          )}
         </main>
       </div>
 

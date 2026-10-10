@@ -16,7 +16,8 @@ import {
   X,
   Clock,
   Layers,
-  GraduationCap
+  GraduationCap,
+  ListTodo
 } from 'lucide-react';
 import { Course } from '../types';
 import ThemeToggle from './ThemeToggle';
@@ -31,6 +32,9 @@ interface SidebarProps {
   onOpenCourseDetail?: (code: string) => void;
   isOpenMobile?: boolean;
   onCloseMobile?: () => void;
+  activeMainTab?: 'feed' | 'assignments';
+  onSelectMainTab?: (tab: 'feed' | 'assignments') => void;
+  pendingAssignmentsCount?: number;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -42,8 +46,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenCourseDetail,
   isOpenMobile = false,
   onCloseMobile,
+  activeMainTab = 'feed',
+  onSelectMainTab,
+  pendingAssignmentsCount = 0,
 }) => {
-  const isAllActive = selectedCourseCode === 'All';
+  const isAllActive = selectedCourseCode === 'All' && activeMainTab === 'feed';
+  const isAssignmentsActive = activeMainTab === 'assignments';
 
   const sidebarContent = (
     <div className="flex flex-col h-full justify-between p-5 text-white">
@@ -90,8 +98,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <nav className="space-y-1.5 overflow-y-auto max-h-[calc(100vh-22rem)] pr-1" aria-label="Course navigation">
           {/* 1. All Notices Overview */}
           <button
-            onClick={() => onSelectCourse('All')}
-            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full text-sm font-semibold transition-all duration-150 ${
+            onClick={() => {
+              onSelectMainTab?.('feed');
+              onSelectCourse('All');
+            }}
+            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full text-sm font-semibold transition-all duration-150 cursor-pointer ${
               isAllActive
                 ? 'bg-white text-zinc-950 shadow-sm'
                 : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60'
@@ -108,16 +119,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </button>
 
-          {/* 2. The 9 Semester 1 Subjects */}
+          {/* 2. Assignment Checklist Tracker Tab */}
+          <button
+            onClick={() => {
+              onSelectMainTab?.('assignments');
+            }}
+            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full text-sm font-semibold transition-all duration-150 cursor-pointer ${
+              isAssignmentsActive
+                ? 'bg-[#c4f510] text-zinc-950 shadow-sm'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <ListTodo className={`w-4 h-4 ${isAssignmentsActive ? 'text-zinc-950' : 'text-zinc-400'}`} />
+              <span>Assignment Checklist</span>
+            </div>
+            {isAssignmentsActive ? (
+              <span className="bg-zinc-950 text-[#c4f510] text-[10px] font-black px-2 py-0.5 rounded-full">
+                Checklist
+              </span>
+            ) : pendingAssignmentsCount > 0 ? (
+              <span className="bg-[#c4f510]/20 text-[#c4f510] text-[11px] font-mono font-bold px-2 py-0.5 rounded-full">
+                {pendingAssignmentsCount}
+              </span>
+            ) : null}
+          </button>
+
+          {/* 3. The 9 Semester 1 Subjects */}
           {courses.map((course) => {
-            const isSelected = selectedCourseCode === course.code;
+            const isSelected = selectedCourseCode === course.code && activeMainTab === 'feed';
             const count = noticeCountsByCourse[course.code] ?? 0;
 
             return (
               <div key={course.code} className="relative group">
                 <button
-                  onClick={() => onSelectCourse(course.code)}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full text-sm font-semibold transition-all duration-150 ${
+                  onClick={() => {
+                    onSelectMainTab?.('feed');
+                    onSelectCourse(course.code);
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full text-sm font-semibold transition-all duration-150 cursor-pointer ${
                     isSelected
                       ? 'bg-white text-zinc-950 shadow-sm'
                       : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60'

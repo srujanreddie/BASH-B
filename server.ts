@@ -11,6 +11,17 @@ import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import {
+  initPersistentStorage,
+  saveNotices,
+  saveTimetable,
+  saveAssignments,
+  getStorageInfo,
+  AssignmentItem,
+  SEED_ASSIGNMENTS,
+} from './server-storage.js';
+import Notice from './models/Notice.js';
+import Assignment from './models/Assignment.js';
 
 dotenv.config();
 
@@ -142,7 +153,6 @@ export const SEED_COURSES = [
 
 // Live Production Mode: Zero demo notices by default
 let memoryCourses = JSON.parse(JSON.stringify(SEED_COURSES));
-let memoryNotices: any[] = []; // Clean live noticeboard for production cohort!
 
 const INITIAL_TIMETABLE_CONFIG = {
   cohortName: 'VNR VJIET — Dept of Computer Science & Engineering',
@@ -202,7 +212,11 @@ const INITIAL_TIMETABLE_CONFIG = {
   },
 };
 
-let currentTimetable = JSON.parse(JSON.stringify(INITIAL_TIMETABLE_CONFIG));
+// Initialize persistent dual-layer storage (Notices, Timetable, Assignments)
+const persistentData = initPersistentStorage(INITIAL_TIMETABLE_CONFIG);
+let memoryNotices: any[] = persistentData.notices;
+let currentTimetable = persistentData.timetable;
+let memoryAssignments: AssignmentItem[] = persistentData.assignments;
 
 
 
@@ -644,6 +658,8 @@ app.put('/api/timetable', authMiddleware, (req: Request, res: Response) => {
     schedule,
   };
 
+  saveTimetable(currentTimetable);
+
   recordSecurityAudit('TIMETABLE_UPDATED', getClientIp(req), `Timetable updated for ${currentTimetable.section}`, 'success', req.headers['user-agent']);
 
   return res.json({
@@ -657,6 +673,8 @@ app.put('/api/timetable', authMiddleware, (req: Request, res: Response) => {
 app.post('/api/timetable/reset', authMiddleware, (req: Request, res: Response) => {
   currentTimetable = JSON.parse(JSON.stringify(INITIAL_TIMETABLE_CONFIG));
   currentTimetable.lastUpdated = new Date().toISOString();
+
+  saveTimetable(currentTimetable);
 
   recordSecurityAudit('TIMETABLE_RESET', getClientIp(req), 'Timetable reset to factory defaults', 'warning', req.headers['user-agent']);
 
@@ -796,6 +814,22 @@ app.post('/api/notices', authMiddleware, (req: Request, res: Response) => {
   };
 
   memoryNotices.unshift(newNotice);
+  saveNotices(memoryNotices);
+
+  if (mongoose.connection.readyState === 1) {
+    Notice.create({
+      title: newNotice.title,
+      description: newNotice.description,
+      category: newNotice.category,
+      courseCode: newNotice.courseCode,
+      courseTitle: newNotice.courseTitle,
+      deadline: newNotice.deadline,
+      resourceLink: newNotice.resourceLink,
+      resourceLabel: newNotice.resourceLabel,
+      isUrgent: newNotice.isUrgent,
+      tags: newNotice.tags,
+    }).catch((err: any) => console.warn('MongoDB notice sync notice:', err.message));
+  }
 
   const clientIp = getClientIp(req);
   recordSecurityAudit(
@@ -852,6 +886,8 @@ app.put('/api/notices/:id', authMiddleware, (req: Request, res: Response) => {
     updatedAt: new Date().toISOString(),
   };
 
+  saveNotices(memoryNotices);
+
   return res.json({
     success: true,
     message: 'Notice updated successfully',
@@ -869,6 +905,8 @@ app.delete('/api/notices/:id', authMiddleware, (req: Request, res: Response) => 
   if (memoryNotices.length === initialLen) {
     return res.status(404).json({ success: false, message: 'Notice not found' });
   }
+
+  saveNotices(memoryNotices);
 
   const clientIp = getClientIp(req);
   recordSecurityAudit(
@@ -888,6 +926,8 @@ app.delete('/api/notices/:id', authMiddleware, (req: Request, res: Response) => 
 app.post('/api/admin/purge-notices', authMiddleware, (req: Request, res: Response) => {
   const count = memoryNotices.length;
   memoryNotices = [];
+  saveNotices(memoryNotices);
+
   const clientIp = getClientIp(req);
   recordSecurityAudit(
     'ALL_NOTICES_PURGED',
@@ -910,6 +950,226 @@ app.post('/api/admin/reset-lockouts', authMiddleware, (req: Request, res: Respon
   return res.json({
     success: true,
     message: `Cleared ${count} IP rate-limiting records.`,
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Assignment Deadline Tracker API (Persistent CRUD)
+// -----------------------------------------------------------------------------
+
+// GET /api/assignments: Fetch active assignments with optional filtering
+app.get('/api/assignments', (req: Request, res: Response) => {
+  const { courseCode, priority, search, sort } = req.query;
+
+  let results = [...memoryAssignments];
+
+  if (courseCode && courseCode !== 'All') {
+    results = results.filter((a) => a.courseCode.toUpperCase() === String(courseCode).toUpperCase());
+  }
+
+  if (priority && priority !== 'All') {
+    results = results.filter((a) => a.priority.toLowerCase() === String(priority).toLowerCase());
+  }
+
+  if (search && typeof search === 'string' && search.trim() !== '') {
+    const q = search.trim().toLowerCase();
+    results = results.filter((a) =>
+      a.title.toLowerCase().includes(q) ||
+      a.description.toLowerCase().includes(q) ||
+      a.courseCode.toLowerCase().includes(q) ||
+      (a.courseTitle && a.courseTitle.toLowerCase().includes(q)) ||
+      (Array.isArray(a.tags) && a.tags.some((t: string) => t.toLowerCase().includes(q)))
+    );
+  }
+
+  // Sort: default by dueDate upcoming first
+  if (sort === 'priority') {
+    const weights: Record<string, number> = { urgent: 3, high: 2, normal: 1 };
+    results.sort((a, b) => (weights[b.priority] || 0) - (weights[a.priority] || 0));
+  } else if (sort === 'newest') {
+    results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } else {
+    results.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+  }
+
+  return res.json({
+    success: true,
+    count: results.length,
+    assignments: results,
+  });
+});
+
+// GET /api/assignments/:id: Single assignment
+app.get('/api/assignments/:id', (req: Request, res: Response) => {
+  const item = memoryAssignments.find((a) => a.id === req.params.id);
+  if (!item) {
+    return res.status(404).json({ success: false, message: 'Assignment not found' });
+  }
+  return res.json({ success: true, assignment: item });
+});
+
+// POST /api/assignments: Create new assignment (Admin protected)
+app.post('/api/assignments', authMiddleware, async (req: Request, res: Response) => {
+  const { courseCode, title, description, dueDate, submissionUrl, priority, maxPoints, tags } = req.body;
+
+  if (!courseCode || !title || !description || !dueDate) {
+    return res.status(400).json({
+      success: false,
+      message: 'Course Code, title, description, and due date are required.',
+    });
+  }
+
+  const course = memoryCourses.find((c: any) => c.code.toUpperCase() === courseCode.toUpperCase());
+  const courseTitle = course ? course.title : courseCode;
+
+  const newAssignment: AssignmentItem = {
+    id: 'asg-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+    courseCode: courseCode.trim().toUpperCase(),
+    courseTitle,
+    title: title.trim(),
+    description: description.trim(),
+    dueDate: new Date(dueDate).toISOString(),
+    submissionUrl: submissionUrl ? submissionUrl.trim() : '',
+    priority: priority && ['urgent', 'high', 'normal'].includes(priority) ? priority : 'normal',
+    maxPoints: maxPoints ? Number(maxPoints) : 20,
+    tags: Array.isArray(tags) ? tags : [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  memoryAssignments.unshift(newAssignment);
+  saveAssignments(memoryAssignments);
+
+  if (mongoose.connection.readyState === 1) {
+    try {
+      await Assignment.create({
+        courseCode: newAssignment.courseCode,
+        courseTitle: newAssignment.courseTitle,
+        title: newAssignment.title,
+        description: newAssignment.description,
+        dueDate: newAssignment.dueDate,
+        submissionUrl: newAssignment.submissionUrl,
+        priority: newAssignment.priority,
+        maxPoints: newAssignment.maxPoints,
+        tags: newAssignment.tags,
+      });
+    } catch (err: any) {
+      console.warn('MongoDB assignment sync fallback:', err.message);
+    }
+  }
+
+  const clientIp = getClientIp(req);
+  recordSecurityAudit(
+    'ASSIGNMENT_BROADCAST',
+    clientIp,
+    `New assignment posted: "${newAssignment.title}" [${newAssignment.courseCode}]`,
+    'info',
+    req.headers['user-agent']
+  );
+
+  return res.status(201).json({
+    success: true,
+    message: 'Assignment broadcasted and saved persistently.',
+    assignment: newAssignment,
+  });
+});
+
+// PUT /api/assignments/:id: Update existing assignment (Admin protected)
+app.put('/api/assignments/:id', authMiddleware, (req: Request, res: Response) => {
+  const { id } = req.params;
+  const index = memoryAssignments.findIndex((a) => a.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ success: false, message: 'Assignment not found' });
+  }
+
+  const { courseCode, title, description, dueDate, submissionUrl, priority, maxPoints, tags } = req.body;
+  const course = courseCode
+    ? memoryCourses.find((c: any) => c.code.toUpperCase() === courseCode.toUpperCase())
+    : null;
+
+  memoryAssignments[index] = {
+    ...memoryAssignments[index],
+    ...(courseCode && { courseCode: courseCode.trim().toUpperCase() }),
+    ...(course && { courseTitle: course.title }),
+    ...(title && { title: title.trim() }),
+    ...(description && { description: description.trim() }),
+    ...(dueDate && { dueDate: new Date(dueDate).toISOString() }),
+    ...(submissionUrl !== undefined && { submissionUrl: submissionUrl.trim() }),
+    ...(priority && { priority }),
+    ...(maxPoints !== undefined && { maxPoints: Number(maxPoints) }),
+    ...(tags !== undefined && { tags: Array.isArray(tags) ? tags : [] }),
+    updatedAt: new Date().toISOString(),
+  };
+
+  saveAssignments(memoryAssignments);
+
+  return res.json({
+    success: true,
+    message: 'Assignment updated and persisted successfully.',
+    assignment: memoryAssignments[index],
+  });
+});
+
+// DELETE /api/assignments/:id: Remove assignment (Admin protected)
+app.delete('/api/assignments/:id', authMiddleware, (req: Request, res: Response) => {
+  const { id } = req.params;
+  const initialLen = memoryAssignments.length;
+  const removed = memoryAssignments.find((a) => a.id === id);
+  memoryAssignments = memoryAssignments.filter((a) => a.id !== id);
+
+  if (memoryAssignments.length === initialLen) {
+    return res.status(404).json({ success: false, message: 'Assignment not found' });
+  }
+
+  saveAssignments(memoryAssignments);
+
+  const clientIp = getClientIp(req);
+  recordSecurityAudit(
+    'ASSIGNMENT_DELETED',
+    clientIp,
+    `Assignment deleted: "${removed?.title || id}"`,
+    'info',
+    req.headers['user-agent']
+  );
+
+  return res.json({
+    success: true,
+    message: 'Assignment removed successfully.',
+  });
+});
+
+// POST /api/assignments/reset-seed: Restore standard default assignments (Admin protected)
+app.post('/api/assignments/reset-seed', authMiddleware, (req: Request, res: Response) => {
+  memoryAssignments = JSON.parse(JSON.stringify(SEED_ASSIGNMENTS));
+  saveAssignments(memoryAssignments);
+
+  recordSecurityAudit(
+    'ASSIGNMENTS_RESTORED',
+    getClientIp(req),
+    'Default Section B curriculum assignments restored.',
+    'warning',
+    req.headers['user-agent']
+  );
+
+  return res.json({
+    success: true,
+    message: 'Default curriculum assignments restored and saved persistently.',
+    count: memoryAssignments.length,
+    assignments: memoryAssignments,
+  });
+});
+
+// GET /api/system/storage-status: Persistent storage health check
+app.get('/api/system/storage-status', (_req: Request, res: Response) => {
+  const status = getStorageInfo(
+    memoryNotices.length,
+    memoryAssignments.length,
+    mongoose.connection.readyState === 1
+  );
+  return res.json({
+    success: true,
+    storage: status,
   });
 });
 

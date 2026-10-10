@@ -69,3 +69,40 @@ export interface TimetableConfig {
   schedule: TimetableSchedule;
 }
 
+export interface Assignment {
+  id: string;
+  _id?: string;
+  courseCode: string;
+  courseTitle?: string;
+  title: string;
+  description: string;
+  dueDate: string; // ISO date string
+  submissionUrl?: string;
+  priority: 'urgent' | 'high' | 'normal';
+  maxPoints?: number;
+  tags?: string[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface StudentChecklistEntry {
+  completed: boolean;
+  completedAt?: string;
+  notes?: string;
+}
+
+export interface StorageStatus {
+  fileStorage: {
+    active: boolean;
+    storagePath: string;
+    noticesCount: number;
+    timetableConfigured: boolean;
+    assignmentsCount: number;
+    lastSaved: string;
+  };
+  cloudDatabase: {
+    type: 'mongodb' | 'none';
+    connected: boolean;
+  };
+}
+
