@@ -26,6 +26,7 @@ import {
 import { Notice, Course, CategoryFilter } from '../types';
 import UrgentThreatCard from './UrgentThreatCard';
 import ThemeToggle from './ThemeToggle';
+import BashBLogo from './BashBLogo';
 import { getGoogleCalendarUrl, exportNoticesToIcs } from '../utils/calendarExport';
 
 interface NoticeFeedProps {
@@ -142,17 +143,21 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
       {/* 1. Header (Precisely mimicking the reference top header) */}
       <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-1">
         <div>
-          {/* User / Cohort info pill */}
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-zinc-900 dark:bg-zinc-800 text-[#d2f34c] flex items-center justify-center font-bold text-xs border border-zinc-300 dark:border-zinc-700">
-              B
+          {/* Brand & Cohort Badge */}
+          <div className="flex items-center gap-3 mb-2.5">
+            <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-700/80 flex items-center justify-center shadow-xs p-1">
+              <BashBLogo size={28} />
             </div>
             <div>
-              <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-900 dark:text-zinc-100">
+              <div className="flex items-center gap-2 text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                <span className="font-black text-sm tracking-tight text-zinc-950 dark:text-white">
+                  <span>bash</span><span className="text-[#c8f828]">-b</span>
+                </span>
+                <span className="text-zinc-300 dark:text-zinc-700">·</span>
                 <span>Section B · Room E-139</span>
                 <ChevronDown className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
               </div>
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">CSE Cohort 2026-27</p>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">CSE Cohort 2026-27 Noticeboard & Vault</p>
             </div>
           </div>
 
