@@ -100,18 +100,18 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({
 
   return (
     <article
-      className={`group relative rounded-xl border p-4 sm:p-5 transition-all duration-200 ${
+      className={`group relative rounded-[2rem] border p-5 sm:p-6 transition-all duration-200 ${
         isCompleted
-          ? 'bg-slate-50/70 border-slate-200/80 opacity-60'
-          : 'bg-white hover:bg-slate-50/30 border-slate-200 hover:border-slate-300 shadow-xs'
+          ? 'bg-zinc-100/70 border-zinc-200/80 opacity-60'
+          : 'bg-white hover:border-zinc-300 border-zinc-200/70 shadow-xs hover:shadow-sm'
       }`}
     >
       <div className="flex items-start gap-3.5">
-        {/* Ghost Check-Off Checkbox (Ergonomic touch hitbox >= 44px) */}
+        {/* Ghost Check-Off Checkbox */}
         <div className="pt-0.5 shrink-0">
           <label 
             htmlFor={`checkbox-${noticeId}`}
-            className="flex items-center justify-center w-8 h-8 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors"
+            className="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-zinc-100 transition-colors"
             title={isCompleted ? 'Mark as incomplete' : 'Ghost check-off (Saved locally)'}
           >
             <input
@@ -122,10 +122,10 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({
               className="sr-only"
             />
             <div
-              className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+              className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${
                 isCompleted
-                  ? 'bg-slate-700 border-slate-700 text-white'
-                  : 'border-slate-300 group-hover:border-slate-400 bg-white'
+                  ? 'bg-[#d2f34c] border-[#d2f34c] text-zinc-950 font-bold'
+                  : 'border-zinc-300 group-hover:border-zinc-400 bg-white'
               }`}
             >
               {isCompleted && <Check className="w-3.5 h-3.5 stroke-[3]" />}
@@ -135,48 +135,49 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({
 
         {/* Notice Main Content */}
         <div className="min-w-0 flex-1">
-          {/* Header Metadata (Zero-pill text with typographic separators) */}
-          <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500 mb-1.5">
+          {/* Header Metadata */}
+          <div className="flex flex-wrap items-center gap-2 text-xs mb-2">
             <button
               type="button"
               onClick={() => onFilterCourse && onFilterCourse(notice.courseCode)}
-              className="font-mono font-semibold text-slate-900 hover:text-indigo-600 transition-colors hover:underline"
+              className="font-mono font-bold text-white bg-[#1e1e1e] hover:bg-zinc-800 transition-colors px-2.5 py-0.5 rounded-full text-[11px]"
             >
               {notice.courseCode}
             </button>
-            <span aria-hidden="true" className="text-slate-300">·</span>
-            <span className="font-medium text-slate-700">{notice.category}</span>
+            <span className={`px-2.5 py-0.5 rounded-full font-bold text-[11px] ${
+              notice.category === 'Exam'
+                ? 'bg-[#aea8ff] text-zinc-950'
+                : notice.category === 'Assignment'
+                ? 'bg-[#d2f34c] text-zinc-950'
+                : 'bg-emerald-200 text-emerald-950'
+            }`}>
+              {notice.category}
+            </span>
             {notice.courseTitle && (
-              <>
-                <span aria-hidden="true" className="text-slate-300 hidden sm:inline">·</span>
-                <span className="truncate max-w-[200px] text-slate-500 hidden sm:inline">
-                  {notice.courseTitle}
-                </span>
-              </>
+              <span className="truncate max-w-[200px] text-zinc-500 font-medium hidden sm:inline">
+                {notice.courseTitle}
+              </span>
             )}
             {deadlineInfo && (
-              <>
-                <span aria-hidden="true" className="text-slate-300">·</span>
-                <span
-                  className={`font-mono tabular-nums flex items-center gap-1 ${
-                    deadlineInfo.isNear
-                      ? 'text-rose-600 font-semibold'
-                      : deadlineInfo.isOverdue
-                      ? 'text-slate-400'
-                      : 'text-amber-700'
-                  }`}
-                >
-                  <Clock className="w-3 h-3 shrink-0" />
-                  {deadlineInfo.urgencyTag || deadlineInfo.dateStr}
-                </span>
-              </>
+              <span
+                className={`font-mono tabular-nums flex items-center gap-1 font-bold text-[11px] px-2.5 py-0.5 rounded-full ${
+                  deadlineInfo.isNear
+                    ? 'bg-rose-100 text-rose-800'
+                    : deadlineInfo.isOverdue
+                    ? 'bg-zinc-100 text-zinc-500'
+                    : 'bg-amber-100 text-amber-900'
+                }`}
+              >
+                <Clock className="w-3 h-3 shrink-0" />
+                {deadlineInfo.urgencyTag || deadlineInfo.dateStr}
+              </span>
             )}
           </div>
 
           {/* Title */}
           <h3
-            className={`text-base font-semibold tracking-tight text-slate-900 leading-snug mb-1.5 ${
-              isCompleted ? 'line-through text-slate-500' : ''
+            className={`text-base font-extrabold tracking-tight text-zinc-950 leading-snug mb-1.5 ${
+              isCompleted ? 'line-through text-zinc-400' : ''
             }`}
           >
             {notice.title}
@@ -184,45 +185,45 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({
 
           {/* Description */}
           <p
-            className={`text-sm leading-relaxed mb-3 ${
-              isCompleted ? 'text-slate-400' : 'text-slate-600'
+            className={`text-xs sm:text-sm leading-relaxed mb-4 ${
+              isCompleted ? 'text-zinc-400 line-through' : 'text-zinc-600'
             }`}
           >
             {notice.description}
           </p>
 
           {/* Bottom Bar: Centralized Drive Links & Utility Actions */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-zinc-100">
             {/* Left: Resource Link (Drive/GitHub/PDF) */}
             <div>
               {notice.resourceLink ? (
                 <button
                   type="button"
                   onClick={handleResourceClick}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100/80 px-2.5 py-1.5 rounded-lg transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-800 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200 px-3 py-1.5 rounded-full transition-colors border border-zinc-200 cursor-pointer shadow-2xs"
                 >
                   {notice.resourceLink.includes('github') ? (
-                    <FolderGit2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                    <FolderGit2 className="w-3.5 h-3.5 text-zinc-800 shrink-0" />
                   ) : (
-                    <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                    <FileText className="w-3.5 h-3.5 text-[#5a4dd0] shrink-0" />
                   )}
                   <span className="truncate max-w-[220px]">
                     {notice.resourceLabel || 'Open Attached Resource'}
                   </span>
-                  <ExternalLink className="w-3 h-3 text-indigo-400 shrink-0" />
+                  <ExternalLink className="w-3 h-3 text-zinc-400 shrink-0" />
                 </button>
               ) : (
-                <span className="text-xs text-slate-400 italic">No external link attached</span>
+                <span className="text-xs text-zinc-400 font-medium">No external link attached</span>
               )}
             </div>
 
             {/* Right: Deadline Exact Date & Share / GCal / Star Tools */}
-            <div className="flex items-center gap-2 sm:gap-3 text-xs text-slate-500">
+            <div className="flex items-center gap-2 sm:gap-3 text-xs text-zinc-500">
               {notice.deadline && (
-                <div className="flex items-center gap-1 font-mono tabular-nums text-slate-600">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <div className="flex items-center gap-1 font-mono tabular-nums text-zinc-600 font-semibold bg-[#f2f2f4] px-2.5 py-1 rounded-full text-[11px]">
+                  <Calendar className="w-3 h-3 text-zinc-400 shrink-0" />
                   <span>
-                    {notice.category === 'Exam' ? 'Date of Exam: ' : 'Deadline: '}
+                    {notice.category === 'Exam' ? 'Exam: ' : 'Due: '}
                     {new Date(notice.deadline).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
@@ -234,11 +235,11 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({
                   href={getGoogleCalendarUrl(notice) || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  className="p-1.5 rounded-full text-zinc-400 hover:text-zinc-950 hover:bg-zinc-100 transition-colors"
                   title="Add deadline to Google Calendar"
                   aria-label="Add to Google Calendar"
                 >
-                  <CalendarPlus className="w-3.5 h-3.5" />
+                  <CalendarPlus className="w-4 h-4" />
                 </a>
               )}
 
@@ -247,7 +248,7 @@ export const NoticeCard: React.FC<NoticeCardProps> = ({
                 <button
                   type="button"
                   onClick={() => onToggleStar(noticeId)}
-                  className={`p-1 rounded transition-colors ${
+                  className={`p-1.5 rounded-full transition-colors ${
                     isStarred
                       ? 'text-amber-500 hover:text-amber-600'
                       : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'

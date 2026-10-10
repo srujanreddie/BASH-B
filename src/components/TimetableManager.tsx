@@ -299,17 +299,17 @@ export const TimetableManager: React.FC<TimetableManagerProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs text-left">
+    <div className="bg-white rounded-[2rem] border border-zinc-200/60 p-6 shadow-xs text-left">
       {/* Header Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-5 pb-4 border-b border-slate-100">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-zinc-100">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-slate-900 text-white">
-              <Calendar className="w-5 h-5 text-emerald-400" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#1e1e1e] text-[#d2f34c] flex items-center justify-center shrink-0">
+              <Calendar className="w-5 h-5 text-[#d2f34c]" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900">Cohort Timetable Routine Manager</h2>
-              <p className="text-xs text-slate-500">
+              <h2 className="text-base font-extrabold text-zinc-950 tracking-tight">Cohort Timetable Routine Manager</h2>
+              <p className="text-xs text-zinc-500 font-medium">
                 Configure lecture hours, laboratory slots, rooms, and faculty for CSE Sem 1 Section B (BASH-B).
               </p>
             </div>
@@ -319,31 +319,31 @@ export const TimetableManager: React.FC<TimetableManagerProps> = ({
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setShowImageGuide(!showImageGuide)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200/80 transition-colors cursor-pointer"
           >
-            <ImageIcon className="w-3.5 h-3.5 text-indigo-600" />
-            <span>{showImageGuide ? 'Hide Timetable Image' : 'View Timetable Image'}</span>
+            <ImageIcon className="w-3.5 h-3.5 text-[#5a4dd0]" />
+            <span>{showImageGuide ? 'Hide Image' : 'Timetable Image'}</span>
           </button>
 
           <button
             onClick={handleOpenJsonEditor}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200/80 transition-colors cursor-pointer"
           >
-            <FileCode className="w-3.5 h-3.5 text-slate-500" />
+            <FileCode className="w-3.5 h-3.5 text-zinc-500" />
             <span>Bulk JSON</span>
           </button>
 
           <button
             onClick={handleSaveAll}
             disabled={saving}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs ${
+            className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-black transition-all shadow-sm cursor-pointer uppercase tracking-wider ${
               hasUnsavedChanges
-                ? 'bg-emerald-600 hover:bg-emerald-700 text-white animate-pulse'
-                : 'bg-slate-900 hover:bg-slate-800 text-white'
+                ? 'bg-[#d2f34c] hover:bg-[#c2e43b] text-zinc-950 animate-pulse'
+                : 'bg-zinc-900 hover:bg-zinc-800 text-white'
             }`}
           >
             <Save className="w-3.5 h-3.5" />
-            <span>{saving ? 'Synchronizing...' : hasUnsavedChanges ? 'Save & Broadcast *' : 'Save Timetable'}</span>
+            <span>{saving ? 'Saving...' : hasUnsavedChanges ? 'Save & Broadcast *' : 'Save Timetable'}</span>
           </button>
         </div>
       </div>
@@ -412,28 +412,28 @@ export const TimetableManager: React.FC<TimetableManagerProps> = ({
       )}
 
       {/* Preset Quick Actions */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 bg-[#f2f2f4] p-3.5 rounded-2xl border border-zinc-200/80">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Cohort Section:</span>
-          <span className="text-xs font-bold px-2 py-0.5 rounded bg-slate-900 text-white">
+          <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Cohort Section:</span>
+          <span className="text-xs font-black px-3 py-0.5 rounded-full bg-[#1e1e1e] text-white">
             {config.section || 'Section B (BASH-B)'}
           </span>
-          <span className="text-xs text-slate-400">· AY {config.academicYear}</span>
+          <span className="text-xs text-zinc-400 font-medium">· AY {config.academicYear}</span>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs text-slate-500">Presets:</span>
+          <span className="text-xs font-medium text-zinc-500">Presets:</span>
           <button
             type="button"
             onClick={() => handleApplyPreset('sectionB')}
-            className="text-xs font-semibold px-2.5 py-1 rounded bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors"
+            className="text-xs font-bold px-3 py-1 rounded-full bg-white hover:bg-zinc-100 border border-zinc-200/80 text-zinc-800 transition-colors cursor-pointer"
           >
             Reset to BASH-B Standard
           </button>
           <button
             type="button"
             onClick={() => handleApplyPreset('sectionA')}
-            className="text-xs font-semibold px-2.5 py-1 rounded bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors"
+            className="text-xs font-bold px-3 py-1 rounded-full bg-white hover:bg-zinc-100 border border-zinc-200/80 text-zinc-800 transition-colors cursor-pointer"
           >
             Load Section A Routine
           </button>
@@ -441,7 +441,7 @@ export const TimetableManager: React.FC<TimetableManagerProps> = ({
       </div>
 
       {/* Day Selector Tabs */}
-      <div className="flex items-center justify-between gap-2 border-b border-slate-200 mb-4 pb-2 overflow-x-auto">
+      <div className="flex items-center justify-between gap-2 mb-5 pb-2 overflow-x-auto">
         <div className="flex items-center gap-1.5">
           {days.map((day) => {
             const count = (config.schedule[day] || []).length;
@@ -451,15 +451,15 @@ export const TimetableManager: React.FC<TimetableManagerProps> = ({
               <button
                 key={day}
                 onClick={() => setActiveDay(day)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                   isSelected
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                    ? 'bg-[#d2f34c] text-zinc-950 shadow-xs font-black scale-102 ring-2 ring-[#d2f34c]/40'
+                    : 'bg-[#f2f2f4] hover:bg-zinc-200 text-zinc-700'
                 }`}
               >
                 <span>{day}</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                  isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
+                  isSelected ? 'bg-zinc-950 text-white font-bold' : 'bg-zinc-200 text-zinc-600'
                 }`}>
                   {count}
                 </span>
@@ -470,10 +470,10 @@ export const TimetableManager: React.FC<TimetableManagerProps> = ({
 
         <button
           onClick={handleOpenAddSlot}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shrink-0 shadow-xs"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black text-zinc-950 bg-[#d2f34c] hover:bg-[#c2e43b] transition-all shrink-0 shadow-xs cursor-pointer uppercase tracking-wider"
         >
-          <Plus className="w-3.5 h-3.5" />
-          <span>Add Period to {activeDay}</span>
+          <Plus className="w-3.5 h-3.5 stroke-[3]" />
+          <span>Add Period</span>
         </button>
       </div>
 

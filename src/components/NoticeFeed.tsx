@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { Notice, Course, CategoryFilter } from '../types';
 import UrgentThreatCard from './UrgentThreatCard';
+import ThemeToggle from './ThemeToggle';
 import { getGoogleCalendarUrl, exportNoticesToIcs } from '../utils/calendarExport';
 
 interface NoticeFeedProps {
@@ -143,27 +144,27 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
         <div>
           {/* User / Cohort info pill */}
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-zinc-900 text-[#d2f34c] flex items-center justify-center font-bold text-xs border border-zinc-300">
+            <div className="w-8 h-8 rounded-full bg-zinc-900 dark:bg-zinc-800 text-[#d2f34c] flex items-center justify-center font-bold text-xs border border-zinc-300 dark:border-zinc-700">
               B
             </div>
             <div>
-              <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-900">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-900 dark:text-zinc-100">
                 <span>Section B · Room E-139</span>
-                <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
               </div>
-              <p className="text-[11px] text-zinc-500 font-medium">CSE Cohort 2026-27</p>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">CSE Cohort 2026-27</p>
             </div>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-950 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-950 dark:text-zinc-950 tracking-tight bg-[#c4f510] px-3 py-1 rounded-2xl inline-block w-fit">
             Semester Overview
           </h1>
-          <p className="text-zinc-500 text-xs sm:text-sm font-medium mt-1">
+          <p className="text-zinc-500 dark:text-zinc-400 text-xs sm:text-sm font-medium mt-1">
             Take control of your coursework, laboratory tasks & exam deadlines!
           </p>
         </div>
 
-        {/* Right header controls: Search, Notification Bell, Date dropdown */}
+        {/* Right header controls: Search, Theme Toggle, Notification Bell, Date dropdown */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Search bar (pill shape) */}
           <div className="relative">
@@ -173,33 +174,36 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search deadlines, tags..."
-              className="pl-9 pr-4 py-2 bg-white rounded-full text-xs sm:text-sm text-zinc-900 placeholder-zinc-400 border border-zinc-200/80 shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#d2f34c] w-44 sm:w-56 transition-all"
+              className="pl-9 pr-4 py-2 bg-white dark:bg-[#1e1e1e] rounded-full text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 border border-zinc-200/80 dark:border-zinc-800 shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#d2f34c] w-44 sm:w-56 transition-all"
             />
           </div>
+
+          {/* Theme Mode Selector: Segmented Switch between Light and Dark mode */}
+          <ThemeToggle variant="segmented" />
 
           {/* Notification bell with lime dot */}
           <button 
             type="button"
             onClick={onOpenTimetable}
-            className="w-9 h-9 rounded-full bg-white hover:bg-zinc-100 border border-zinc-200/80 shadow-2xs flex items-center justify-center text-zinc-700 relative transition-colors"
+            className="w-9 h-9 rounded-full bg-white dark:bg-[#1e1e1e] hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800 shadow-2xs flex items-center justify-center text-zinc-700 dark:text-zinc-300 relative transition-colors cursor-pointer"
             title="Notifications & Timetable"
           >
             <Bell className="w-4 h-4" />
-            <span className="w-2.5 h-2.5 bg-[#d2f34c] rounded-full absolute top-1 right-1 border-2 border-white" />
+            <span className="w-2.5 h-2.5 bg-[#d2f34c] rounded-full absolute top-1 right-1 border-2 border-white dark:border-[#1e1e1e]" />
           </button>
 
           {/* Date & Dropdown Pill (matching reference image top-right) */}
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline text-xs font-semibold text-zinc-500">
+            <span className="hidden sm:inline text-xs font-semibold text-zinc-500 dark:text-zinc-400">
               {todayDateStr}
             </span>
             <button
               type="button"
               onClick={onOpenTimetable}
-              className="bg-white hover:bg-zinc-50 border border-zinc-200/80 rounded-full px-3.5 py-1.5 text-xs font-bold text-zinc-800 shadow-2xs flex items-center gap-1.5 transition-colors"
+              className="bg-white dark:bg-[#1e1e1e] hover:bg-zinc-50 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800 rounded-full px-3.5 py-1.5 text-xs font-bold text-zinc-800 dark:text-zinc-200 shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <span>Today</span>
-              <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+              <ChevronDown className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
             </button>
           </div>
         </div>
@@ -208,27 +212,27 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
       {/* 2. Overview Metric Cards Grid (Energy Used + Urgent Threat + Wellness Index) */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" aria-label="Semester Metrics">
         {/* Card 1: "Energy Used" style card - Workload Distribution */}
-        <div className="bg-white rounded-[2rem] p-6 shadow-xs border border-zinc-200/60 flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#1e1e1e] rounded-[2rem] p-6 shadow-xs border border-zinc-200/60 dark:border-zinc-800/80 flex flex-col justify-between transition-colors duration-200">
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-900">
-                  <Zap className="w-3.5 h-3.5 fill-zinc-900" />
+                <div className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-900 dark:text-zinc-100">
+                  <Zap className="w-3.5 h-3.5 fill-zinc-900 dark:fill-zinc-100" />
                 </div>
-                <h3 className="text-sm font-bold text-zinc-900 tracking-tight">
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight">
                   Workload Distribution
                 </h3>
               </div>
-              <span className="bg-[#d2f34c]/50 text-zinc-900 text-[11px] font-black px-2 py-0.5 rounded-full">
+              <span className="bg-[#d2f34c]/50 dark:bg-[#d2f34c]/30 text-zinc-900 dark:text-[#d2f34c] text-[11px] font-black px-2 py-0.5 rounded-full">
                 Active Sem
               </span>
             </div>
 
             <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-3xl font-extrabold text-zinc-950 tracking-tight font-mono">
+              <span className="text-3xl font-extrabold text-zinc-950 dark:text-white tracking-tight font-mono">
                 {totalCount}
               </span>
-              <span className="text-xs text-zinc-500 font-medium">total tracked items</span>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">total tracked items</span>
             </div>
 
             {/* Overlapping Circles Graphic (Directly mimicking the reference image!) */}
@@ -240,7 +244,7 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
               </div>
 
               {/* Charcoal Circle (Exams) */}
-              <div className="absolute right-8 top-0 w-18 h-18 rounded-full bg-zinc-900 text-white flex flex-col items-center justify-center shadow-xs z-10">
+              <div className="absolute right-8 top-0 w-18 h-18 rounded-full bg-zinc-900 dark:bg-black text-white flex flex-col items-center justify-center shadow-xs z-10 border border-zinc-800">
                 <span className="text-base font-extrabold leading-tight font-mono">{examsCount}</span>
                 <span className="text-[10px] font-bold text-zinc-300">Exams</span>
               </div>
@@ -254,29 +258,29 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
           </div>
 
           {/* Horizontal progress breakdown bars matching reference */}
-          <div className="space-y-2 pt-2 border-t border-zinc-100 text-xs font-semibold">
-            <div className="flex items-center justify-between text-zinc-600">
+          <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/80 text-xs font-semibold">
+            <div className="flex items-center justify-between text-zinc-600 dark:text-zinc-400">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-[#aea8ff]" />
                 Assignments
               </span>
               <span className="font-mono">{assignmentsCount} items</span>
             </div>
-            <div className="w-full bg-zinc-100 rounded-full h-1.5 overflow-hidden">
+            <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
               <div 
                 className="bg-[#aea8ff] h-1.5 rounded-full"
                 style={{ width: `${totalCount > 0 ? (assignmentsCount / totalCount) * 100 : 0}%` }}
               />
             </div>
 
-            <div className="flex items-center justify-between text-zinc-600 pt-1">
+            <div className="flex items-center justify-between text-zinc-600 dark:text-zinc-400 pt-1">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-[#d2f34c]" />
                 Reference Notes
               </span>
               <span className="font-mono">{materialsCount} items</span>
             </div>
-            <div className="w-full bg-zinc-100 rounded-full h-1.5 overflow-hidden">
+            <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
               <div 
                 className="bg-[#d2f34c] h-1.5 rounded-full"
                 style={{ width: `${totalCount > 0 ? (materialsCount / totalCount) * 100 : 0}%` }}
@@ -314,15 +318,15 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
                 key={cat}
                 type="button"
                 onClick={() => onSelectCategory(cat)}
-                className={`rounded-full px-5 py-2 text-xs sm:text-sm font-bold transition-all duration-150 flex items-center gap-1.5 ${
+                className={`rounded-full px-5 py-2 text-xs sm:text-sm font-bold transition-all duration-150 flex items-center gap-1.5 cursor-pointer ${
                   isActive
                     ? 'bg-[#d2f34c] text-zinc-950 shadow-xs scale-102 ring-2 ring-[#d2f34c]/50'
-                    : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200/80 shadow-2xs'
+                    : 'bg-white dark:bg-[#1e1e1e] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800 shadow-2xs'
                 }`}
               >
                 <span>{label}</span>
                 <span className={`text-[11px] font-mono font-black px-1.5 py-0.2 rounded-full ${
-                  isActive ? 'bg-zinc-950 text-white' : 'bg-zinc-100 text-zinc-600'
+                  isActive ? 'bg-zinc-950 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
                 }`}>
                   {count}
                 </span>
@@ -337,10 +341,10 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
           <button
             type="button"
             onClick={onToggleHideCompleted}
-            className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all border ${
+            className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all border cursor-pointer ${
               hideCompleted
-                ? 'bg-zinc-900 text-white border-zinc-900'
-                : 'bg-white text-zinc-600 hover:bg-zinc-100 border-zinc-200/80'
+                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 border-zinc-900 dark:border-zinc-100'
+                : 'bg-white dark:bg-[#1e1e1e] text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border-zinc-200/80 dark:border-zinc-800'
             }`}
           >
             <span>{hideCompleted ? 'Showing Active' : 'Hide Checked'}</span>
@@ -351,13 +355,13 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
           <button
             type="button"
             onClick={onToggleOnlyStarred}
-            className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all border flex items-center gap-1 ${
+            className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all border flex items-center gap-1 cursor-pointer ${
               onlyStarred
                 ? 'bg-amber-400 text-zinc-950 border-amber-400'
-                : 'bg-white text-zinc-600 hover:bg-zinc-100 border-zinc-200/80'
+                : 'bg-white dark:bg-[#1e1e1e] text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border-zinc-200/80 dark:border-zinc-800'
             }`}
           >
-            <Star className={`w-3.5 h-3.5 ${onlyStarred ? 'fill-zinc-950' : 'text-zinc-400'}`} />
+            <Star className={`w-3.5 h-3.5 ${onlyStarred ? 'fill-zinc-950' : 'text-zinc-400 dark:text-zinc-500'}`} />
             <span>Starred</span>
           </button>
 
@@ -365,10 +369,10 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
           <button
             type="button"
             onClick={() => exportNoticesToIcs(notices)}
-            className="rounded-full px-3.5 py-1.5 text-xs font-bold bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-200/80 shadow-2xs flex items-center gap-1 transition-colors"
+            className="rounded-full px-3.5 py-1.5 text-xs font-bold bg-white dark:bg-[#1e1e1e] hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-800 shadow-2xs flex items-center gap-1 transition-colors cursor-pointer"
             title="Download .ics calendar file"
           >
-            <Calendar className="w-3.5 h-3.5 text-zinc-500" />
+            <Calendar className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
             <span>Sync .ics</span>
           </button>
 
@@ -376,10 +380,10 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
             <button
               type="button"
               onClick={onOpenPrintSheet}
-              className="rounded-full px-3.5 py-1.5 text-xs font-bold bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-200/80 shadow-2xs flex items-center gap-1 transition-colors"
+              className="rounded-full px-3.5 py-1.5 text-xs font-bold bg-white dark:bg-[#1e1e1e] hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-800 shadow-2xs flex items-center gap-1 transition-colors cursor-pointer"
               title="Printable notice sheet"
             >
-              <Printer className="w-3.5 h-3.5 text-zinc-500" />
+              <Printer className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
               <span>Print</span>
             </button>
           )}
@@ -388,16 +392,16 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
 
       {/* Active Course Filter Alert Banner if filtered by a specific course */}
       {selectedCourseCode !== 'All' && (
-        <div className="bg-white rounded-2xl px-4 py-2.5 border border-zinc-200/80 flex items-center justify-between text-xs">
+        <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl px-4 py-2.5 border border-zinc-200/80 dark:border-zinc-800 flex items-center justify-between text-xs transition-colors">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-zinc-900">Filtered by:</span>
-            <span className="bg-zinc-900 text-white px-2 py-0.5 rounded-full font-mono font-bold">
+            <span className="font-bold text-zinc-900 dark:text-zinc-200">Filtered by:</span>
+            <span className="bg-zinc-900 dark:bg-zinc-800 text-white dark:text-[#d2f34c] px-2 py-0.5 rounded-full font-mono font-bold">
               {selectedCourseCode}
             </span>
           </div>
           <button
             onClick={() => onSelectCourseCode('All')}
-            className="text-xs font-bold text-zinc-500 hover:text-zinc-900 underline underline-offset-2"
+            className="text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white underline underline-offset-2 cursor-pointer"
           >
             Clear Filter
           </button>
@@ -406,12 +410,12 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
 
       {/* 4. Notice Cards Grid */}
       {notices.length === 0 ? (
-        <div className="bg-white rounded-[2rem] p-12 text-center border border-zinc-200/60 shadow-xs">
-          <div className="w-12 h-12 rounded-full bg-zinc-100 mx-auto flex items-center justify-center text-zinc-400 mb-3">
+        <div className="bg-white dark:bg-[#1e1e1e] rounded-[2rem] p-12 text-center border border-zinc-200/60 dark:border-zinc-800 shadow-xs transition-colors">
+          <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 mx-auto flex items-center justify-center text-zinc-400 mb-3">
             <BookOpen className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-zinc-900 mb-1">No deadlines found</h3>
-          <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+          <h3 className="text-base font-bold text-zinc-900 dark:text-white mb-1">No deadlines found</h3>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
             Try adjusting your category filter, clearing your search query, or checking another course in the Subject Vault.
           </p>
         </div>
@@ -428,34 +432,34 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
               <article
                 key={id}
                 id={`notice-${id}`}
-                className={`bg-white rounded-[2rem] p-5 sm:p-6 shadow-xs hover:shadow-md transition-all duration-200 border flex flex-col justify-between relative ${
+                className={`bg-white dark:bg-[#1e1e1e] rounded-[2rem] p-5 sm:p-6 shadow-xs hover:shadow-md transition-all duration-200 border flex flex-col justify-between relative ${
                   isDone 
-                    ? 'border-zinc-200/60 bg-white/70' 
+                    ? 'border-zinc-200/60 dark:border-zinc-800/60 bg-white/70 dark:bg-[#171719]' 
                     : isExam 
-                    ? 'border-zinc-200 hover:border-zinc-300' 
-                    : 'border-zinc-200/80 hover:border-zinc-300'
+                    ? 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700' 
+                    : 'border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700'
                 }`}
               >
                 <div>
                   {/* Top Header: Course Code + Category Pill + Ghost Checkbox */}
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="font-mono text-[11px] font-black text-zinc-900 bg-zinc-100 px-2.5 py-1 rounded-full">
+                      <span className="font-mono text-[11px] font-black text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-full">
                         {notice.courseCode}
                       </span>
 
                       <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
                         isExam
-                          ? 'bg-[#aea8ff]/25 text-[#483bc2]'
+                          ? 'bg-[#aea8ff]/25 dark:bg-[#aea8ff]/20 text-[#483bc2] dark:text-[#aea8ff]'
                           : notice.category === 'Assignment'
-                          ? 'bg-[#d2f34c]/50 text-zinc-950'
-                          : 'bg-zinc-100 text-zinc-700'
+                          ? 'bg-[#d2f34c]/50 dark:bg-[#d2f34c]/30 text-zinc-950 dark:text-[#d2f34c]'
+                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
                       }`}>
                         {notice.category}
                       </span>
 
                       {notice.isUrgent && (
-                        <span className="bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-red-200">
+                        <span className="bg-red-50 dark:bg-rose-950/50 text-red-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-red-200 dark:border-rose-900/50">
                           Urgent
                         </span>
                       )}
@@ -466,8 +470,8 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
                       <button
                         type="button"
                         onClick={() => onToggleStar(id)}
-                        className={`p-1.5 rounded-full transition-colors ${
-                          isStar ? 'text-amber-500 bg-amber-50' : 'text-zinc-300 hover:text-zinc-600 hover:bg-zinc-100'
+                        className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                          isStar ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/40' : 'text-zinc-300 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                         }`}
                         title={isStar ? 'Unmark priority' : 'Star priority'}
                       >
@@ -478,10 +482,10 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
                       <button
                         type="button"
                         onClick={() => onToggleComplete(id)}
-                        className={`w-7 h-7 rounded-full flex items-center justify-center transition-all border ${
+                        className={`w-7 h-7 rounded-full flex items-center justify-center transition-all border cursor-pointer ${
                           isDone
                             ? 'bg-[#d2f34c] border-[#d2f34c] text-zinc-950 shadow-2xs'
-                            : 'border-zinc-300 hover:border-zinc-400 text-transparent bg-white'
+                            : 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 text-transparent bg-white dark:bg-zinc-900'
                         }`}
                         title={isDone ? 'Mark as pending' : 'Mark as completed'}
                         aria-label="Toggle task completed"
@@ -493,13 +497,13 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
 
                   {/* Title & Description with "Ghost" Check-off Styling */}
                   <h3 className={`text-base sm:text-lg font-bold leading-snug tracking-tight mb-1.5 transition-colors ${
-                    isDone ? 'line-through text-zinc-400' : 'text-zinc-950'
+                    isDone ? 'line-through text-zinc-400 dark:text-zinc-500' : 'text-zinc-950 dark:text-white'
                   }`}>
                     {notice.title}
                   </h3>
 
                   <p className={`text-xs sm:text-sm leading-relaxed mb-4 transition-colors ${
-                    isDone ? 'line-through text-zinc-400 opacity-80' : 'text-zinc-500'
+                    isDone ? 'line-through text-zinc-400 dark:text-zinc-500 opacity-80' : 'text-zinc-500 dark:text-zinc-400'
                   }`}>
                     {notice.description}
                   </p>
@@ -508,13 +512,13 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
                 <div>
                   {/* Deadline & Urgency Ticker */}
                   {dl && (
-                    <div className="flex items-center justify-between gap-2 py-2.5 px-3 rounded-xl bg-zinc-50 border border-zinc-100 mb-3 text-xs">
-                      <div className="flex items-center gap-1.5 text-zinc-600 font-medium">
+                    <div className="flex items-center justify-between gap-2 py-2.5 px-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/80 border border-zinc-100 dark:border-zinc-800 mb-3 text-xs">
+                      <div className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-300 font-medium">
                         <Clock className={`w-3.5 h-3.5 ${dl.isUrgent ? 'text-[#d2f34c]' : 'text-zinc-400'}`} />
                         <span>{dl.dateStr} · {dl.timeStr}</span>
                       </div>
                       <span className={`font-bold px-2 py-0.5 rounded-full text-[10px] uppercase font-mono ${
-                        dl.isUrgent ? 'bg-[#d2f34c] text-zinc-950' : 'bg-zinc-200/70 text-zinc-700'
+                        dl.isUrgent ? 'bg-[#d2f34c] text-zinc-950' : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
                       }`}>
                         {dl.urgencyText}
                       </span>
@@ -522,22 +526,22 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
                   )}
 
                   {/* Resource Link Pills & Share Button */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-zinc-100">
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
                     <div className="flex flex-wrap items-center gap-1.5">
                       {notice.resourceLink ? (
                         <button
                           type="button"
                           onClick={(e) => handleResourceClick(e, notice)}
-                          className="rounded-full px-3.5 py-1 text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 text-zinc-900 transition-colors inline-flex items-center gap-1.5"
+                          className="rounded-full px-3.5 py-1 text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-200 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                           title="Open attached resource"
                         >
-                          <FileText className="w-3.5 h-3.5 text-zinc-600" />
+                          <FileText className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-400" />
                           <span className="truncate max-w-[150px]">
                             {notice.resourceLabel || 'Open Resource'}
                           </span>
                         </button>
                       ) : (
-                        <span className="text-[11px] text-zinc-400 font-medium">
+                        <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium">
                           No external files
                         </span>
                       )}
@@ -549,7 +553,7 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="p-1 rounded-full text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+                          className="p-1 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                           title="Add to Google Calendar"
                         >
                           <CalendarPlus className="w-3.5 h-3.5" />
@@ -560,7 +564,7 @@ export const NoticeFeed: React.FC<NoticeFeedProps> = ({
                     <button
                       type="button"
                       onClick={(e) => handleShare(e, notice)}
-                      className="p-1 text-zinc-400 hover:text-zinc-700 rounded-full hover:bg-zinc-100 transition-colors"
+                      className="p-1 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                       title="Copy notice text"
                     >
                       <Share2 className="w-3.5 h-3.5" />

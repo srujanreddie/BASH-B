@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import NoticeFeed from '../components/NoticeFeed';
+import ThemeToggle from '../components/ThemeToggle';
+import BashBLogo from '../components/BashBLogo';
 import ResourceViewerModal from '../components/ResourceViewerModal';
 import CourseDetailModal from '../components/CourseDetailModal';
 import CohortTimetableModal from '../components/CohortTimetableModal';
@@ -218,7 +220,7 @@ export const Home: React.FC = () => {
   }, [notices]);
 
   return (
-    <div className="min-h-screen bg-[#f2f2f4] text-zinc-950 flex flex-col lg:flex-row antialiased selection:bg-[#d2f34c] selection:text-zinc-950">
+    <div className="min-h-screen bg-[#f2f2f4] dark:bg-[#121214] text-zinc-950 dark:text-zinc-100 flex flex-col lg:flex-row antialiased selection:bg-[#d2f34c] selection:text-zinc-950 transition-colors duration-200">
       {/* 1. Left Sidebar (The "Subject Vault") - Desktop & Mobile */}
       <Sidebar
         courses={courses}
@@ -240,33 +242,34 @@ export const Home: React.FC = () => {
         onCloseMobile={() => setMobileMenuOpen(false)}
       />
 
-      {/* 2. Main Content Area (Light Gray Theme bg-[#f2f2f4]) */}
+      {/* 2. Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         {/* Mobile Top App Bar */}
         <div className="lg:hidden bg-[#1e1e1e] text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-md">
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="p-1.5 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+              className="p-1.5 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700 transition-colors cursor-pointer"
               aria-label="Open navigation menu"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-1.5">
-              <div className="w-6 h-6 rounded-md bg-[#d2f34c] text-zinc-950 flex items-center justify-center font-black text-xs">
-                ⚡
-              </div>
-              <span className="font-extrabold text-base tracking-tight text-white">flux</span>
+              <BashBLogo size={24} />
+              <span className="font-black text-base tracking-tight text-white">
+                <span>bash</span><span className="text-[#c8f828]">-b</span>
+              </span>
               <span className="text-[10px] bg-zinc-800 px-1.5 py-0.5 rounded-full font-bold text-zinc-400">
                 CSE B
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <ThemeToggle variant="segmented" className="!bg-zinc-800/90 !border-zinc-700/80 scale-90 sm:scale-100 origin-right" />
             <button
               onClick={() => setIsTimetableOpen(true)}
-              className="p-1.5 rounded-full bg-zinc-800 text-zinc-300 hover:text-white"
+              className="p-1.5 rounded-full bg-zinc-800 text-zinc-300 hover:text-white cursor-pointer"
               title="Open Timetable"
             >
               <Calendar className="w-4 h-4 text-[#d2f34c]" />
@@ -274,14 +277,14 @@ export const Home: React.FC = () => {
             <button
               onClick={() => loadData(true)}
               disabled={refreshing}
-              className="p-1.5 rounded-full bg-zinc-800 text-zinc-300 hover:text-white"
+              className="p-1.5 rounded-full bg-zinc-800 text-zinc-300 hover:text-white cursor-pointer"
               title="Refresh"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             </button>
             <Link
               to="/admin-login"
-              className="p-1.5 rounded-full bg-zinc-800 text-zinc-300 hover:text-white"
+              className="p-1.5 rounded-full bg-zinc-800 text-zinc-300 hover:text-white cursor-pointer"
               title="Admin Login"
             >
               <Lock className="w-4 h-4" />
@@ -347,6 +350,9 @@ export const Home: React.FC = () => {
         url={modalState.url}
         courseCode={modalState.courseCode}
       />
+
+      {/* Floating Theme Switcher Pill (quick access anytime on public page) */}
+      <ThemeToggle variant="floating" />
     </div>
   );
 };

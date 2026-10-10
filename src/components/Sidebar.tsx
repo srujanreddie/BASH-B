@@ -19,6 +19,8 @@ import {
   GraduationCap
 } from 'lucide-react';
 import { Course } from '../types';
+import ThemeToggle from './ThemeToggle';
+import BashBLogo from './BashBLogo';
 
 interface SidebarProps {
   courses: Course[];
@@ -49,13 +51,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div>
         <div className="flex items-center justify-between gap-3 mb-6 px-1">
           <div className="flex items-center gap-2.5">
-            {/* Logo Mark mimicking the reference "flux" logo */}
-            <div className="w-8 h-8 rounded-xl bg-[#d2f34c] text-zinc-950 flex items-center justify-center font-black text-sm shadow-xs">
-              <span className="tracking-tighter">⚡</span>
+            {/* Logo Mark matching user's bash-b design */}
+            <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shadow-xs p-1">
+              <BashBLogo size={28} />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-lg text-white tracking-tight">flux</span>
+                <span className="font-black text-lg text-white tracking-tight">
+                  <span>bash</span>
+                  <span className="text-[#c8f828]">-b</span>
+                </span>
                 <span className="text-[11px] font-bold text-zinc-400 bg-zinc-800/80 px-2 py-0.5 rounded-full">
                   CSE
                 </span>
@@ -179,6 +184,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
+        {/* Global Theme Toggle (Light / Dark mode selection) */}
+        <div className="pt-1">
+          <ThemeToggle variant="segmented" className="w-full !bg-zinc-800/90 !border-zinc-700/70" />
+        </div>
+
         {/* Footer shortcuts */}
         <div className="flex items-center justify-between px-2 text-xs text-zinc-400 pt-1">
           <a
@@ -198,7 +208,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <>
       {/* Desktop Fixed Left Sidebar */}
       <aside 
-        className="hidden lg:block w-72 xl:w-80 shrink-0 bg-[#1e1e1e] rounded-[2rem] m-3 mr-0 shadow-md h-[calc(100vh-1.5rem)] sticky top-3 overflow-hidden"
+        className="hidden lg:block w-72 xl:w-80 shrink-0 bg-[#1e1e1e] dark:bg-[#18181b] rounded-[2rem] m-3 mr-0 shadow-md border border-transparent dark:border-zinc-800/80 h-[calc(100vh-1.5rem)] sticky top-3 overflow-hidden transition-colors duration-200"
         aria-label="Subject Vault Sidebar"
       >
         {sidebarContent}
@@ -211,7 +221,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
             onClick={onCloseMobile}
           />
-          <div className="relative w-80 max-w-[85vw] bg-[#1e1e1e] h-full shadow-2xl z-10 flex flex-col">
+          <div className="relative w-80 max-w-[85vw] bg-[#1e1e1e] dark:bg-[#18181b] border-r border-transparent dark:border-zinc-800 h-full shadow-2xl z-10 flex flex-col">
             {sidebarContent}
           </div>
         </div>

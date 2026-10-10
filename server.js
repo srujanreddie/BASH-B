@@ -728,6 +728,7 @@ app.use((err, _req, res, _next) => {
     message: err.message || "Internal server error occurred. Please try again."
   });
 });
+app.use(express.static(path.resolve(__dirname, "public")));
 async function startServer() {
   const isDev = process.env.NODE_ENV === "development";
   const distPath = path.resolve(__dirname, "dist");

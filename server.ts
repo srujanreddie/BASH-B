@@ -933,6 +933,9 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
+// Serve static assets from public folder (favicons, logos, manifests)
+app.use(express.static(path.resolve(__dirname, 'public')));
+
 // -----------------------------------------------------------------------------
 // Vite Middlewares Integration for Full-Stack App
 // -----------------------------------------------------------------------------

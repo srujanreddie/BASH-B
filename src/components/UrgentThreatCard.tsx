@@ -29,16 +29,25 @@ interface TimeRemaining {
   minutes: number;
   seconds: number;
   isExpired: boolean;
+  isNoDeadline?: boolean;
   totalMs: number;
 }
 
-function calculateTimeRemaining(targetIso: string): TimeRemaining {
+function calculateTimeRemaining(targetIso?: string | null): TimeRemaining {
+  if (!targetIso) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: false, isNoDeadline: true, totalMs: 0 };
+  }
   const target = new Date(targetIso).getTime();
   const now = Date.now();
   const diff = target - now;
 
   if (diff <= 0) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true, totalMs: 0 };
+    const overdueDiff = Math.abs(diff);
+    const days = Math.floor(overdueDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((overdueDiff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((overdueDiff / (1000 * 60)) % 60);
+    const seconds = Math.floor((overdueDiff / 1000) % 60);
+    return { days, hours, minutes, seconds, isExpired: true, totalMs: diff };
   }
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -58,38 +67,61 @@ export const UrgentThreatCard: React.FC<UrgentThreatCardProps> = ({
   const [threatNotice, setThreatNotice] = useState<Notice | null>(null);
   const [countdown, setCountdown] = useState<TimeRemaining | null>(null);
 
-  // Scan and select closest upcoming uncompleted deadline
+  // Scan and select closest uncompleted task / deadline in this section
   useEffect(() => {
     const now = Date.now();
-    const activeWithDeadlines = notices
-      .filter((n) => {
-        if (!n.deadline) return false;
-        const time = new Date(n.deadline).getTime();
-        const isDone = Boolean(completedMap[n.id || (n as any)._id]);
-        return time > now && !isDone;
-      })
+    const uncompletedNotices = notices.filter((n) => {
+      const id = n.id || (n as any)._id;
+      return !completedMap[id];
+    });
+
+    if (uncompletedNotices.length === 0) {
+      setThreatNotice(null);
+      return;
+    }
+
+    // 1. Prioritize uncompleted notices with upcoming future deadlines
+    const futureDeadlines = uncompletedNotices
+      .filter((n) => n.deadline && new Date(n.deadline).getTime() > now)
       .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime());
 
-    if (activeWithDeadlines.length > 0) {
-      setThreatNotice(activeWithDeadlines[0]);
-    } else {
-      const anyFuture = notices
-        .filter((n) => n.deadline && new Date(n.deadline).getTime() > now)
-        .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime());
-
-      setThreatNotice(anyFuture.length > 0 ? anyFuture[0] : null);
+    if (futureDeadlines.length > 0) {
+      setThreatNotice(futureDeadlines[0]);
+      return;
     }
+
+    // 2. Next, prioritize uncompleted notices with overdue deadlines (urgent action needed)
+    const overdueDeadlines = uncompletedNotices
+      .filter((n) => n.deadline && new Date(n.deadline).getTime() <= now)
+      .sort((a, b) => new Date(b.deadline!).getTime() - new Date(a.deadline!).getTime());
+
+    if (overdueDeadlines.length > 0) {
+      setThreatNotice(overdueDeadlines[0]);
+      return;
+    }
+
+    // 3. Next, prioritize uncompleted Exam or Assignment tasks even without a strict ISO deadline
+    const priorityTasks = uncompletedNotices
+      .filter((n) => n.category === 'Exam' || n.category === 'Assignment');
+
+    if (priorityTasks.length > 0) {
+      setThreatNotice(priorityTasks[0]);
+      return;
+    }
+
+    // 4. Any remaining uncompleted notice in this section
+    setThreatNotice(uncompletedNotices[0]);
   }, [notices, completedMap]);
 
   // Live timer tick every second
   useEffect(() => {
-    if (!threatNotice || !threatNotice.deadline) {
+    if (!threatNotice) {
       setCountdown(null);
       return;
     }
 
     const updateTimer = () => {
-      setCountdown(calculateTimeRemaining(threatNotice.deadline!));
+      setCountdown(calculateTimeRemaining(threatNotice.deadline));
     };
 
     updateTimer();
@@ -97,10 +129,13 @@ export const UrgentThreatCard: React.FC<UrgentThreatCardProps> = ({
     return () => clearInterval(interval);
   }, [threatNotice]);
 
-  // If no threats active or all cleared
-  if (!threatNotice || !countdown || countdown.isExpired) {
+  // Check if there are any uncompleted items in this section
+  const uncompletedCount = notices.filter((n) => !completedMap[n.id || (n as any)._id]).length;
+
+  // ONLY show Threat Radar Clean if there is NOTHING to do in this section!
+  if (uncompletedCount === 0 || !threatNotice) {
     return (
-      <div className="bg-[#1e1e1e] text-white rounded-[2rem] p-6 shadow-sm border border-zinc-800/80">
+      <div className="bg-[#1e1e1e] dark:bg-[#18181b] text-white rounded-[2rem] p-6 shadow-sm border border-zinc-800/80 dark:border-zinc-800 transition-colors duration-200">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-[#d2f34c]">
@@ -119,7 +154,9 @@ export const UrgentThreatCard: React.FC<UrgentThreatCardProps> = ({
         <div className="p-4 rounded-2xl bg-zinc-800/40 border border-zinc-800 flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 text-[#d2f34c] shrink-0" />
           <p className="text-xs text-zinc-300">
-            No active assignment or exam deadlines pending submission. Good job staying on top of the Semester 1 curriculum!
+            {notices.length === 0
+              ? 'No notices or tasks posted in this section yet. All clear!'
+              : 'All notices and tasks in this section have been marked complete. Good job staying on top of the Semester 1 curriculum!'}
           </p>
         </div>
       </div>
@@ -128,10 +165,12 @@ export const UrgentThreatCard: React.FC<UrgentThreatCardProps> = ({
 
   const noticeId = threatNotice.id || (threatNotice as any)._id;
   const isExam = threatNotice.category === 'Exam';
+  const isOverdue = Boolean(countdown?.isExpired);
+  const isNoDeadline = Boolean(countdown?.isNoDeadline);
 
   return (
     <div 
-      className="bg-[#1e1e1e] text-white rounded-[2rem] p-6 shadow-sm border border-zinc-800/80 transition-all cursor-pointer hover:border-zinc-700"
+      className="bg-[#1e1e1e] dark:bg-[#18181b] text-white rounded-[2rem] p-6 shadow-sm border border-zinc-800/80 dark:border-zinc-800 transition-all cursor-pointer hover:border-zinc-700 dark:hover:border-zinc-650"
       onClick={() => onSelectNotice?.(noticeId)}
     >
       {/* Top Header Row (matches Sleep Analysis header in reference) */}
@@ -145,8 +184,16 @@ export const UrgentThreatCard: React.FC<UrgentThreatCardProps> = ({
               <h3 className="text-base font-bold text-white tracking-tight">
                 Next Immediate Threat
               </h3>
-              <span className="bg-[#d2f34c] text-zinc-950 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">
-                {isExam ? 'CIE Exam' : 'Due Soon'}
+              <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                isOverdue 
+                  ? 'bg-rose-500 text-white' 
+                  : isExam 
+                  ? 'bg-[#d2f34c] text-zinc-950' 
+                  : isNoDeadline 
+                  ? 'bg-[#aea8ff] text-zinc-950' 
+                  : 'bg-[#d2f34c] text-zinc-950'
+              }`}>
+                {isOverdue ? 'Overdue Action' : isExam ? 'CIE Exam' : isNoDeadline ? 'Active Task' : 'Due Soon'}
               </span>
             </div>
             <p className="text-xs text-zinc-400 truncate max-w-[280px] sm:max-w-md">
@@ -158,18 +205,24 @@ export const UrgentThreatCard: React.FC<UrgentThreatCardProps> = ({
         {/* Pill Dropdown style selector */}
         <div className="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors shrink-0">
           <Clock className="w-3.5 h-3.5 text-[#d2f34c]" />
-          <span>Live Ticker</span>
+          <span>{isOverdue ? 'Action Needed' : isNoDeadline ? 'Uncompleted' : 'Live Ticker'}</span>
         </div>
       </div>
 
-      {/* Two Highlight Metrics with Lime Green & Soft Purple Bars (matches Sleep Efficiency & Duration in reference) */}
+      {/* Two Highlight Metrics with Lime Green & Soft Purple Bars */}
       <div className="grid grid-cols-2 gap-4 pb-5 mb-5 border-b border-zinc-800/80">
         {/* Left Stat: Lime Green Accent */}
         <div className="flex items-center gap-2.5">
-          <div className="w-1.5 h-8 bg-[#d2f34c] rounded-full shrink-0 shadow-[0_0_8px_rgba(210,243,76,0.5)]" />
+          <div className={`w-1.5 h-8 rounded-full shrink-0 ${isOverdue ? 'bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.5)]' : 'bg-[#d2f34c] shadow-[0_0_8px_rgba(210,243,76,0.5)]'}`} />
           <div>
             <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-mono tabular-nums leading-none">
-              {countdown.days > 0 ? (
+              {!countdown || isNoDeadline ? (
+                <span className="text-xl sm:text-2xl font-sans font-bold text-[#d2f34c]">PENDING</span>
+              ) : isOverdue ? (
+                <span className="text-xl sm:text-2xl font-sans font-bold text-rose-400">
+                  {countdown.days > 0 ? `${countdown.days}d OVER` : 'OVERDUE'}
+                </span>
+              ) : countdown.days > 0 ? (
                 <>
                   {countdown.days}<span className="text-sm font-sans font-bold text-[#d2f34c]">d</span> {countdown.hours}<span className="text-sm font-sans font-bold text-[#d2f34c]">h</span>
                 </>
@@ -181,7 +234,9 @@ export const UrgentThreatCard: React.FC<UrgentThreatCardProps> = ({
                 </>
               )}
             </div>
-            <p className="text-xs text-zinc-400 mt-1 font-medium">Countdown Remaining</p>
+            <p className="text-xs text-zinc-400 mt-1 font-medium">
+              {isNoDeadline ? 'No Strict Deadline Set' : isOverdue ? 'Deadline Passed — Complete Now' : 'Countdown Remaining'}
+            </p>
           </div>
         </div>
 
@@ -205,7 +260,7 @@ export const UrgentThreatCard: React.FC<UrgentThreatCardProps> = ({
           { label: 'Mon', h: 'h-10', active: false },
           { label: 'Tue', h: 'h-14', active: false },
           { label: 'Wed', h: 'h-12', active: false },
-          { label: 'Thu', h: 'h-24', active: 'lime', value: countdown.days > 0 ? `${countdown.days}d` : 'Now' },
+          { label: 'Thu', h: 'h-24', active: 'lime', value: countdown ? (countdown.isNoDeadline ? 'Act' : countdown.isExpired ? 'Due!' : countdown.days > 0 ? `${countdown.days}d` : 'Now') : 'Now' },
           { label: 'Fri', h: 'h-18', active: 'purple', value: 'Sub' },
           { label: 'Sat', h: 'h-12', active: false },
           { label: 'Sun', h: 'h-8', active: false },

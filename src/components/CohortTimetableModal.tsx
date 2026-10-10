@@ -94,38 +94,38 @@ export const CohortTimetableModal: React.FC<CohortTimetableModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
       <div 
-        className="bg-white rounded-2xl max-w-3xl w-full shadow-2xl border border-slate-200 relative text-left max-h-[92vh] flex flex-col overflow-hidden"
+        className="bg-white dark:bg-[#1e1e1e] rounded-[2.5rem] max-w-3xl w-full shadow-2xl border border-zinc-200/80 dark:border-zinc-800 relative text-left max-h-[92vh] flex flex-col overflow-hidden transition-colors"
         role="dialog"
         aria-modal="true"
         aria-labelledby="timetable-modal-title"
       >
         {/* Header */}
-        <div className="p-4 sm:p-5 pb-3 border-b border-slate-100 flex items-center justify-between gap-3 bg-slate-900 text-white">
+        <div className="p-5 border-b border-zinc-800 flex items-center justify-between gap-3 bg-[#1e1e1e] text-white">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2.5 rounded-xl bg-white/10 text-emerald-400 shrink-0">
-              <Calendar className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-full bg-zinc-800 text-[#d2f34c] flex items-center justify-center shrink-0">
+              <Calendar className="w-5 h-5 text-[#d2f34c]" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 id="timetable-modal-title" className="text-base font-bold text-white truncate">
+                <h2 id="timetable-modal-title" className="text-base font-extrabold text-white tracking-tight truncate">
                   {timetableConfig.cohortName}
                 </h2>
-                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold shrink-0">
+                <span className="text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full bg-[#d2f34c] text-zinc-950 shrink-0">
                   {selectedSection === 'B' ? 'BASH-B' : 'Sec A'}
                 </span>
               </div>
-              <p className="text-xs text-slate-300 truncate">
+              <p className="text-xs text-zinc-400 font-medium truncate">
                 Academic Year {timetableConfig.academicYear} · Weekly Lecture & Lab Routine
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handlePrint}
-              className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-2 rounded-full text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
               title="Print Timetable"
               aria-label="Print timetable"
             >
@@ -135,7 +135,7 @@ export const CohortTimetableModal: React.FC<CohortTimetableModalProps> = ({
               <Link
                 to="/dashboard?tab=timetable"
                 onClick={onClose}
-                className="hidden sm:flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500 hover:bg-emerald-600 text-slate-950 transition-colors"
+                className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-black rounded-full bg-[#d2f34c] hover:bg-[#c2e43b] text-zinc-950 transition-colors uppercase tracking-wider"
                 title="Manage Timetable in Admin Dashboard"
               >
                 <Settings className="w-3.5 h-3.5" />
@@ -144,16 +144,16 @@ export const CohortTimetableModal: React.FC<CohortTimetableModalProps> = ({
             )}
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
               aria-label="Close timetable"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Section Switcher & Day Navigation */}
-        <div className="px-4 sm:px-5 py-2.5 bg-slate-50 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
+        <div className="px-5 py-3 bg-[#f2f2f4] dark:bg-[#171719] border-b border-zinc-200/80 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-3">
           {/* Day Selector */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
             {days.map((day) => {
@@ -164,15 +164,15 @@ export const CohortTimetableModal: React.FC<CohortTimetableModalProps> = ({
                 <button
                   key={day}
                   onClick={() => setActiveDay(day)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
                     isSelected
-                      ? 'bg-slate-900 text-white shadow-xs'
-                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                      ? 'bg-[#d2f34c] text-zinc-950 shadow-xs font-black ring-2 ring-[#d2f34c]/40'
+                      : 'bg-white dark:bg-zinc-800/80 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 border border-zinc-200/60 dark:border-zinc-700'
                   }`}
                 >
                   <span>{day}</span>
                   {isToday && (
-                    <span className={`text-[10px] px-1 rounded font-normal ${isSelected ? 'bg-emerald-500 text-slate-950 font-bold' : 'bg-emerald-100 text-emerald-800 font-semibold'}`}>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isSelected ? 'bg-zinc-950 text-white' : 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300'}`}>
                       Today
                     </span>
                   )}
@@ -182,23 +182,23 @@ export const CohortTimetableModal: React.FC<CohortTimetableModalProps> = ({
           </div>
 
           {/* Section Selector Pill */}
-          <div className="flex items-center bg-slate-200/80 p-0.5 rounded-lg text-xs shrink-0 font-medium">
+          <div className="flex items-center bg-zinc-200/90 dark:bg-zinc-800 p-0.5 rounded-full text-xs shrink-0 font-medium">
             <button
               onClick={() => setSelectedSection('B')}
-              className={`px-2.5 py-1 rounded-md transition-colors ${
+              className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
                 selectedSection === 'B' 
-                  ? 'bg-white text-slate-900 shadow-2xs font-bold' 
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-white dark:bg-zinc-900 text-zinc-950 dark:text-white shadow-2xs font-bold' 
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
               }`}
             >
               Section B (BASH-B)
             </button>
             <button
               onClick={() => setSelectedSection('A')}
-              className={`px-2.5 py-1 rounded-md transition-colors ${
+              className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
                 selectedSection === 'A' 
-                  ? 'bg-white text-slate-900 shadow-2xs font-bold' 
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-white dark:bg-zinc-900 text-zinc-950 dark:text-white shadow-2xs font-bold' 
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
               }`}
             >
               Section A
@@ -208,20 +208,20 @@ export const CohortTimetableModal: React.FC<CohortTimetableModalProps> = ({
 
         {/* Live Active Class Status Banner (If today) */}
         {isTodayActive && (activeSlot || nextSlot) && (
-          <div className="mx-4 sm:mx-5 mt-3 p-3 rounded-xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between gap-3 text-xs">
+          <div className="mx-5 mt-3 p-3.5 rounded-2xl bg-[#d2f34c]/20 border border-[#d2f34c]/50 flex items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2.5 min-w-0">
               <span className="relative flex h-2.5 w-2.5 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d2f34c] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#8bb507]"></span>
               </span>
               <div className="min-w-0">
                 {activeSlot ? (
-                  <p className="font-semibold text-emerald-950 truncate">
-                    <span className="font-bold text-emerald-700">In Session Now:</span> {activeSlot.time} · {activeSlot.subject} ({activeSlot.room})
+                  <p className="font-semibold text-zinc-950 truncate">
+                    <span className="font-black text-zinc-900">In Session Now:</span> {activeSlot.time} · {activeSlot.subject} ({activeSlot.room})
                   </p>
                 ) : nextSlot ? (
-                  <p className="font-medium text-emerald-900 truncate">
-                    <span className="font-bold text-emerald-700">Upcoming Next:</span> {nextSlot.time} · {nextSlot.subject} ({nextSlot.room})
+                  <p className="font-medium text-zinc-900 truncate">
+                    <span className="font-bold text-zinc-800">Upcoming Next:</span> {nextSlot.time} · {nextSlot.subject} ({nextSlot.room})
                   </p>
                 ) : null}
               </div>
@@ -232,7 +232,7 @@ export const CohortTimetableModal: React.FC<CohortTimetableModalProps> = ({
                   onSelectCourse(activeSlot.code);
                   onClose();
                 }}
-                className="shrink-0 text-[11px] font-semibold text-emerald-800 hover:text-emerald-950 underline"
+                className="shrink-0 text-xs font-bold text-zinc-950 bg-[#d2f34c] px-3 py-1 rounded-full shadow-2xs hover:bg-[#c2e43b] transition-colors cursor-pointer"
               >
                 View Syllabus
               </button>
@@ -241,12 +241,12 @@ export const CohortTimetableModal: React.FC<CohortTimetableModalProps> = ({
         )}
 
         {/* Schedule List */}
-        <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-2.5">
+        <div className="p-5 overflow-y-auto flex-1 space-y-3">
           {currentSlots.length === 0 ? (
-            <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-500">
-              <Calendar className="w-8 h-8 mx-auto text-slate-400 mb-2 opacity-50" />
-              <p className="text-sm font-semibold">No scheduled periods for {activeDay}</p>
-              <p className="text-xs text-slate-400 mt-1">Enjoy your study break or weekend revision!</p>
+            <div className="p-8 text-center bg-[#f2f2f4] dark:bg-zinc-900 rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800 text-zinc-500">
+              <Calendar className="w-8 h-8 mx-auto text-zinc-400 mb-2 opacity-50" />
+              <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">No scheduled periods for {activeDay}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Enjoy your study break or weekend revision!</p>
             </div>
           ) : (
             currentSlots.map((slot, idx) => {
@@ -256,26 +256,22 @@ export const CohortTimetableModal: React.FC<CohortTimetableModalProps> = ({
               return (
                 <div
                   key={slot.id || idx}
-                  className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
+                  className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${
                     isCurrent
-                      ? 'bg-emerald-50/90 border-emerald-300 ring-2 ring-emerald-500/20 text-emerald-950 shadow-xs'
+                      ? 'bg-white dark:bg-zinc-900 border-[#d2f34c] ring-2 ring-[#d2f34c]/40 text-zinc-950 dark:text-white shadow-md'
                       : isBreak
-                      ? 'bg-amber-50/40 border-amber-200/60 text-amber-900'
+                      ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50 text-amber-950 dark:text-amber-200'
                       : slot.type === 'Lab'
-                      ? 'bg-purple-50/30 border-purple-200 text-purple-950 hover:bg-purple-50/60'
-                      : slot.type === 'Drawing'
-                      ? 'bg-sky-50/30 border-sky-200 text-sky-950 hover:bg-sky-50/60'
-                      : slot.type === 'Tutorial'
-                      ? 'bg-indigo-50/30 border-indigo-200 text-indigo-950 hover:bg-indigo-50/60'
-                      : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-900'
+                      ? 'bg-purple-50/40 dark:bg-purple-950/20 border-purple-200 dark:border-purple-900/50 text-purple-950 dark:text-purple-200 hover:bg-purple-50/70 dark:hover:bg-purple-950/30'
+                      : 'bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-850 border-zinc-200/80 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
                   }`}
                 >
                   {/* Left: Time and Tag */}
-                  <div className="flex items-center gap-2 sm:w-36 shrink-0 font-mono text-xs tabular-nums font-semibold text-slate-600">
-                    <Clock className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                  <div className="flex items-center gap-2 sm:w-36 shrink-0 font-mono text-xs tabular-nums font-bold text-zinc-600 dark:text-zinc-400">
+                    <Clock className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
                     <span>{slot.time}</span>
                     {isCurrent && (
-                      <span className="sm:hidden text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500 text-slate-950">
+                      <span className="sm:hidden text-[10px] font-black px-2 py-0.5 rounded-full bg-[#d2f34c] text-zinc-950">
                         NOW
                       </span>
                     )}
@@ -285,40 +281,39 @@ export const CohortTimetableModal: React.FC<CohortTimetableModalProps> = ({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       {!isBreak && (
-                        <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 shrink-0">
+                        <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#1e1e1e] text-white shrink-0">
                           {slot.code}
                         </span>
                       )}
-                      <span className="text-xs sm:text-sm font-semibold truncate">
+                      <span className="text-xs sm:text-sm font-extrabold text-zinc-950 dark:text-white truncate">
                         {slot.subject}
                       </span>
                       {isCurrent && (
-                        <span className="hidden sm:inline-flex text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white animate-pulse">
+                        <span className="hidden sm:inline-flex text-[10px] font-black px-2.5 py-0.5 rounded-full bg-[#d2f34c] text-zinc-950 animate-pulse">
                           LIVE NOW
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-1 flex-wrap">
+                    <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 mt-1 flex-wrap">
                       <span className="flex items-center gap-1 font-medium">
-                        <MapPin className="w-3 h-3 text-slate-400" />
+                        <MapPin className="w-3.5 h-3.5 text-zinc-400" />
                         <span>{slot.room}</span>
                       </span>
                       {slot.instructor && (
                         <>
                           <span>·</span>
                           <span className="flex items-center gap-1">
-                            <User className="w-3 h-3 text-slate-400" />
+                            <User className="w-3.5 h-3.5 text-zinc-400" />
                             <span>{slot.instructor}</span>
                           </span>
                         </>
                       )}
                       <span>·</span>
-                      <span className={`font-medium ${
-                        slot.type === 'Lab' ? 'text-purple-700' :
-                        slot.type === 'Tutorial' ? 'text-indigo-700' :
-                        slot.type === 'Drawing' ? 'text-sky-700' :
-                        isBreak ? 'text-amber-700' : 'text-slate-600'
+                      <span className={`font-semibold ${
+                        slot.type === 'Lab' ? 'text-[#5a4dd0] dark:text-[#aea8ff]' :
+                        slot.type === 'Drawing' ? 'text-amber-700 dark:text-amber-400' :
+                        isBreak ? 'text-amber-800 dark:text-amber-300' : 'text-zinc-600 dark:text-zinc-400'
                       }`}>
                         {slot.type}
                       </span>
@@ -333,9 +328,9 @@ export const CohortTimetableModal: React.FC<CohortTimetableModalProps> = ({
                           onSelectCourse(slot.code);
                           onClose();
                         }}
-                        className="text-[11px] font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1"
+                        className="text-xs font-bold text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 dark:hover:text-white bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 border border-zinc-200 dark:border-zinc-700 cursor-pointer"
                       >
-                        <BookOpen className="w-3 h-3" />
+                        <BookOpen className="w-3.5 h-3.5" />
                         <span>Deadlines & Notes</span>
                       </button>
                     </div>
@@ -347,22 +342,22 @@ export const CohortTimetableModal: React.FC<CohortTimetableModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-3.5 sm:p-4 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+        <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-[#f2f2f4] dark:bg-[#171719] flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500 dark:text-zinc-400">
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline">Practical labs run in 3-hour continuous blocks (02:00 PM - 05:00 PM).</span>
-            <span className="sm:hidden font-mono text-[11px]">BASH-B Timetable</span>
+            <span className="hidden sm:inline font-medium">Practical labs run in 2-3 hour continuous blocks.</span>
+            <span className="sm:hidden font-mono text-[11px]">BASH-B Routine</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="px-3 py-1.5 font-medium text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 rounded-full transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print A4</span>
             </button>
             <button
               onClick={onClose}
-              className="px-4 py-1.5 font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors"
+              className="px-5 py-2 font-bold text-white bg-zinc-900 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
             >
               Close
             </button>

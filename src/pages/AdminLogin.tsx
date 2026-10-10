@@ -21,6 +21,8 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { safeFetchJson } from '../utils/api';
+import ThemeToggle from '../components/ThemeToggle';
+import BashBLogo from '../components/BashBLogo';
 
 const DEFAULT_MASTER_KEY = 'Admin@CSE2026#Live!';
 const DEFAULT_RECOVERY_KEY = 'CSE2026-RECOVER-ROOT-ACCESS';
@@ -411,52 +413,57 @@ export const AdminLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 selection:bg-rose-500 selection:text-white">
-      {/* Background Accent Gradients */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-rose-900/15 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/3 w-80 h-80 bg-emerald-950/20 rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-screen bg-[#f2f2f4] dark:bg-[#121214] text-zinc-950 dark:text-zinc-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 selection:bg-[#d2f34c] selection:text-zinc-950 font-sans transition-colors duration-200">
       <div className="relative sm:mx-auto sm:w-full sm:max-w-md">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-xs font-mono text-slate-400 hover:text-white mb-6 transition-colors group"
-        >
-          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Exit to Public Cohort View</span>
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-xs font-bold text-zinc-700 dark:text-zinc-300 bg-white dark:bg-[#1e1e1e] hover:bg-zinc-100 dark:hover:bg-zinc-800 px-4 py-2 rounded-full transition-all shadow-xs border border-zinc-200/80 dark:border-zinc-800 group"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+            <span>Exit to Public Cohort View</span>
+          </Link>
+          <ThemeToggle />
+        </div>
+
+        {/* Brand Emblem */}
+        <div className="flex justify-center mb-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-white shadow-sm">
+            <BashBLogo size={22} />
+            <span className="font-black text-sm tracking-tight">
+              <span>bash</span><span className="text-[#c8f828]">-b</span>
+            </span>
+            <span className="text-[10px] text-zinc-400 font-mono">CSE B</span>
+          </div>
+        </div>
 
         {/* Security Shield Header */}
         <div className="flex justify-center mb-3">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/80 text-white flex items-center justify-center shadow-2xl relative">
-            <Lock className="w-6 h-6 text-rose-400" />
-            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+          <div className="w-14 h-14 rounded-2xl bg-[#d2f34c] text-zinc-950 flex items-center justify-center shadow-lg relative font-black">
+            <Lock className="w-6 h-6 stroke-[2.5]" />
+            <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-[#1e1e1e]" />
             </span>
           </div>
         </div>
 
-        <h1 className="text-center text-xl sm:text-2xl font-bold tracking-tight text-white font-sans">
+        <h1 className="text-center text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-950 dark:text-white">
           Cohort Admin Gateway
         </h1>
-        <p className="mt-1 text-center text-xs text-slate-400 font-mono">
+        <p className="mt-1 text-center text-xs text-zinc-500 dark:text-zinc-400 font-medium">
           Restricted Portal · Semester 1 Computer Science & Engineering
         </p>
       </div>
 
       <div className="relative mt-6 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-slate-900/90 backdrop-blur-xl py-7 px-6 sm:px-8 shadow-2xl border border-slate-800 rounded-2xl relative overflow-hidden">
-          {/* Top Security Line */}
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500" />
-
+        <div className="bg-[#1e1e1e] text-white py-8 px-6 sm:px-8 shadow-2xl border border-zinc-800 rounded-[2.5rem] relative overflow-hidden">
           {/* Active Lockout Alert */}
           {securityStatus?.isLocked ? (
-            <div className="p-4 rounded-xl bg-rose-950/80 border border-rose-800/90 text-rose-200 text-xs flex items-start gap-3 mb-5">
+            <div className="p-4 rounded-2xl bg-rose-950/80 border border-rose-800/90 text-rose-200 text-xs flex items-start gap-3 mb-5">
               <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="font-semibold text-rose-300 uppercase tracking-wider mb-0.5">
+                <p className="font-bold text-rose-300 uppercase tracking-wider mb-0.5">
                   Security Lockout Active
                 </p>
                 <p className="text-rose-200/90 leading-relaxed">
@@ -469,7 +476,7 @@ export const AdminLogin: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleDirectUnlock}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#d2f34c] hover:bg-[#c2e43b] text-zinc-950 font-bold text-xs transition-colors cursor-pointer"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Quick Unlock Now</span>
@@ -482,10 +489,10 @@ export const AdminLogin: React.FC = () => {
                       setRecoverySuccess(null);
                       setIsRecoveryOpen(true);
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-900/90 hover:bg-rose-800 text-white font-medium text-xs transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white font-medium text-xs transition-colors cursor-pointer"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Emergency Reset & Unlock</span>
+                    <span>Emergency Reset</span>
                   </button>
                 </div>
               </div>
@@ -494,7 +501,7 @@ export const AdminLogin: React.FC = () => {
 
           {/* Success Message */}
           {success && (
-            <div className="p-3.5 rounded-xl bg-emerald-950/70 border border-emerald-800 text-xs text-emerald-300 flex items-start gap-2.5 mb-4">
+            <div className="p-3.5 rounded-2xl bg-emerald-950/70 border border-emerald-800 text-xs text-emerald-300 flex items-start gap-2.5 mb-4">
               <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
               <div className="flex-1 font-medium">{success}</div>
             </div>
@@ -502,42 +509,42 @@ export const AdminLogin: React.FC = () => {
 
           {/* Error Message */}
           {error && !securityStatus?.isLocked && (
-            <div className="p-3.5 rounded-xl bg-rose-950/70 border border-rose-800 text-xs text-rose-300 flex items-start gap-2.5 mb-4">
+            <div className="p-3.5 rounded-2xl bg-rose-950/70 border border-rose-800 text-xs text-rose-300 flex items-start gap-2.5 mb-4">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
               <div className="flex-1">
-                <span className="font-semibold block mb-0.5">Authentication Failed</span>
+                <span className="font-bold block mb-0.5">Authentication Failed</span>
                 <span className="text-rose-200/90">{error}</span>
               </div>
             </div>
           )}
 
           {/* Security Status Counter */}
-          <div className="mb-4 flex items-center justify-between text-[11px] font-mono text-slate-400 bg-slate-950/70 px-3 py-2 rounded-lg border border-slate-800/70">
+          <div className="mb-5 flex items-center justify-between text-xs font-mono text-zinc-400 bg-zinc-900/90 px-4 py-2 rounded-full border border-zinc-800">
             <span className="flex items-center gap-1.5">
-              <Fingerprint className="w-3.5 h-3.5 text-slate-400" />
-              <span>Anti-Brute Force Protection</span>
+              <Fingerprint className="w-3.5 h-3.5 text-[#d2f34c]" />
+              <span className="font-sans text-[11px] font-semibold">Brute-Force Guard</span>
             </span>
             <span
               className={
                 securityStatus && securityStatus.attemptsRemaining <= 2
-                  ? 'text-amber-400 font-bold'
-                  : 'text-slate-300'
+                  ? 'text-[#d2f34c] font-bold'
+                  : 'text-zinc-300'
               }
             >
               {securityStatus
-                ? `${securityStatus.attemptsRemaining} of ${securityStatus.maxAttempts} attempts left`
-                : '5 of 5 attempts left'}
+                ? `${securityStatus.attemptsRemaining}/${securityStatus.maxAttempts} attempts`
+                : '5/5 attempts'}
             </span>
           </div>
 
           <form className="space-y-4" onSubmit={handleLogin}>
             <div>
-              <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center justify-between mb-1.5 px-1">
                 <label
                   htmlFor="admin-pass"
-                  className="block text-xs font-semibold text-slate-300 uppercase tracking-wider"
+                  className="block text-xs font-bold text-zinc-300 uppercase tracking-wider"
                 >
-                  Master Admin Passphrase
+                  Master Passphrase
                 </label>
                 <button
                   type="button"
@@ -547,9 +554,9 @@ export const AdminLogin: React.FC = () => {
                     setRecoverySuccess(null);
                     setIsRecoveryOpen(true);
                   }}
-                  className="text-[11px] text-slate-400 hover:text-rose-400 transition-colors underline cursor-pointer"
+                  className="text-[11px] text-zinc-400 hover:text-[#d2f34c] transition-colors underline cursor-pointer"
                 >
-                  Forgot password?
+                  Forgot key?
                 </button>
               </div>
 
@@ -563,13 +570,13 @@ export const AdminLogin: React.FC = () => {
                   required
                   disabled={Boolean(securityStatus?.isLocked || loading)}
                   autoFocus
-                  className="w-full pl-3 pr-10 py-2.5 text-sm bg-slate-950/90 text-white border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 font-mono tracking-wider transition-all placeholder:text-slate-600 disabled:opacity-50"
+                  className="w-full pl-5 pr-12 py-3 text-sm bg-zinc-900 text-white border border-zinc-750 rounded-full focus:outline-none focus:ring-2 focus:ring-[#d2f34c] font-mono tracking-wider transition-all placeholder:text-zinc-600 disabled:opacity-50"
                 />
 
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors cursor-pointer"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -577,9 +584,9 @@ export const AdminLogin: React.FC = () => {
               </div>
 
               {/* Portal Security Indicator & Emergency Recovery Link */}
-              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 font-mono">
+              <div className="mt-2.5 px-2 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
                 <span className="flex items-center gap-1">
-                  <Lock className="w-3 h-3 text-slate-500" />
+                  <Lock className="w-3 h-3 text-[#d2f34c]" />
                   <span>Authorized Staff Only</span>
                 </span>
                 <button
@@ -590,7 +597,7 @@ export const AdminLogin: React.FC = () => {
                     setRecoverySuccess(null);
                     setIsRecoveryOpen(true);
                   }}
-                  className="text-slate-400 hover:text-rose-400 transition-colors underline cursor-pointer"
+                  className="text-zinc-400 hover:text-[#d2f34c] transition-colors underline cursor-pointer"
                 >
                   Emergency Recovery
                 </button>
@@ -600,28 +607,28 @@ export const AdminLogin: React.FC = () => {
             <button
               type="submit"
               disabled={Boolean(securityStatus?.isLocked || loading || !password.trim())}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white text-xs font-semibold tracking-wide transition-all shadow-lg shadow-rose-950/50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-full bg-[#d2f34c] hover:bg-[#c2e43b] text-zinc-950 text-xs font-black tracking-wide transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer uppercase"
             >
               {loading ? (
-                <span className="font-mono">Verifying Credentials & Session...</span>
+                <span className="font-mono">Verifying Credentials...</span>
               ) : (
                 <>
                   <ShieldCheck className="w-4 h-4" />
-                  <span>Authenticate & Open Admin Dashboard</span>
+                  <span>Authenticate & Enter Console</span>
                 </>
               )}
             </button>
           </form>
 
           {/* Security Information Footnote */}
-          <div className="mt-5 pt-4 border-t border-slate-800 text-[11px] text-slate-400 space-y-2">
-            <div className="flex items-start gap-2 text-slate-400">
-              <Info className="w-3.5 h-3.5 text-slate-500 shrink-0 mt-0.5" />
+          <div className="mt-5 pt-4 border-t border-zinc-800 text-[11px] text-zinc-400 space-y-2">
+            <div className="flex items-start gap-2 text-zinc-400">
+              <Info className="w-3.5 h-3.5 text-[#d2f34c] shrink-0 mt-0.5" />
               <span>
                 Protected against unauthorized intrusion: 5 attempts before 15m lockout. If password is forgotten, use the Emergency Master Recovery Key.
               </span>
             </div>
-            <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 font-mono">
+            <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-1 font-mono">
               <span>Bearer JWT Token Encryption</span>
               <span>CSE Cohort 2026</span>
             </div>
@@ -631,107 +638,109 @@ export const AdminLogin: React.FC = () => {
 
       {/* Emergency Recovery Modal */}
       {isRecoveryOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative text-left">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
-              <div className="flex items-center gap-2 text-white font-bold text-sm">
-                <KeyRound className="w-4 h-4 text-rose-500" />
-                <span>Emergency Password Recovery</span>
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#1e1e1e] text-white border border-zinc-800 rounded-[2.5rem] max-w-md w-full p-6 sm:p-8 shadow-2xl relative text-left">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4">
+              <div className="flex items-center gap-2.5 text-white font-extrabold text-base">
+                <div className="w-8 h-8 rounded-full bg-[#d2f34c] text-zinc-950 flex items-center justify-center">
+                  <KeyRound className="w-4 h-4" />
+                </div>
+                <span>Emergency Recovery</span>
               </div>
               <button
                 type="button"
                 onClick={() => setIsRecoveryOpen(false)}
-                className="p-1 rounded text-slate-400 hover:text-white cursor-pointer"
+                className="p-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 cursor-pointer transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+            <p className="text-xs text-zinc-400 mb-4 leading-relaxed">
               If you forgot your password or got locked out, enter the system{' '}
-              <strong className="text-rose-400 font-mono">Root Recovery Key</strong> to reset your password or instantly restore default access.
+              <strong className="text-[#d2f34c] font-mono">Root Recovery Key</strong> to reset your password or instantly restore default access.
             </p>
 
             {recoveryError && (
-              <div className="mb-3 p-3 rounded-lg bg-rose-950/80 border border-rose-800 text-xs text-rose-300">
+              <div className="mb-3 p-3.5 rounded-2xl bg-rose-950/80 border border-rose-800 text-xs text-rose-300">
                 {recoveryError}
               </div>
             )}
 
             {recoverySuccess && (
-              <div className="mb-3 p-3 rounded-lg bg-emerald-950/80 border border-emerald-800 text-xs text-emerald-300">
+              <div className="mb-3 p-3.5 rounded-2xl bg-emerald-950/80 border border-emerald-800 text-xs text-emerald-300">
                 {recoverySuccess}
               </div>
             )}
 
-            <form onSubmit={handleEmergencyReset} className="space-y-3">
+            <form onSubmit={handleEmergencyReset} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Emergency Master Recovery Key *
+                <label className="block text-xs font-bold text-zinc-300 mb-1 px-1">
+                  Emergency Recovery Key *
                 </label>
                 <input
                   type="text"
                   value={recoveryKey}
                   onChange={(e) => setRecoveryKey(e.target.value)}
-                  placeholder="Enter system root recovery key"
+                  placeholder="Enter root recovery key"
                   required
-                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white font-mono focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-4 py-2.5 text-xs bg-zinc-900 border border-zinc-750 rounded-full text-white font-mono focus:outline-none focus:ring-2 focus:ring-[#d2f34c]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-zinc-300 mb-1 px-1">
                   New Master Password (Min 8 chars) *
                 </label>
                 <input
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter your new administrator password"
+                  placeholder="Enter new administrator password"
                   required
                   minLength={8}
-                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white font-mono focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-4 py-2.5 text-xs bg-zinc-900 border border-zinc-750 rounded-full text-white font-mono focus:outline-none focus:ring-2 focus:ring-[#d2f34c]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Confirm New Master Password *
+                <label className="block text-xs font-bold text-zinc-300 mb-1 px-1">
+                  Confirm New Password *
                 </label>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Re-type your new password"
+                  placeholder="Re-type new password"
                   required
-                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white font-mono focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-4 py-2.5 text-xs bg-zinc-900 border border-zinc-750 rounded-full text-white font-mono focus:outline-none focus:ring-2 focus:ring-[#d2f34c]"
                 />
               </div>
 
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-2">
+              <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-2">
                 <button
                   type="button"
                   onClick={handleQuickRestoreDefault}
                   disabled={recovering}
-                  className="w-full sm:w-auto px-3 py-2 rounded-lg text-xs font-medium text-amber-300 bg-amber-950/60 hover:bg-amber-900/80 border border-amber-800 transition-colors disabled:opacity-50 cursor-pointer text-center"
+                  className="w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-amber-300 bg-amber-950/60 hover:bg-amber-900/80 border border-amber-800 transition-colors disabled:opacity-50 cursor-pointer text-center"
                 >
-                  Restore Factory Default
+                  Factory Default
                 </button>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                   <button
                     type="button"
                     onClick={() => setIsRecoveryOpen(false)}
-                    className="px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white cursor-pointer"
+                    className="px-4 py-2 rounded-full text-xs font-semibold text-zinc-400 hover:text-white cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={recovering}
-                    className="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-rose-600 hover:bg-rose-500 transition-colors disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2 rounded-full text-xs font-extrabold text-zinc-950 bg-[#d2f34c] hover:bg-[#c2e43b] transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
                   >
-                    {recovering ? 'Resetting...' : 'Save New Password'}
+                    {recovering ? 'Resetting...' : 'Save Password'}
                   </button>
                 </div>
               </div>
